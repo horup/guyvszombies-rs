@@ -1,7 +1,8 @@
 use std::rc::Rc;
-use crate::Metadata;
+use crate::{Metadata, State};
 
 #[derive(Default)]
 pub struct Context {
-    pub metadata:Rc<Metadata>
+    pub metadata:Rc<Metadata>,
+    pub state:State
 }

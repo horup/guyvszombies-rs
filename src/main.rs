@@ -21,11 +21,10 @@ async fn main() {
     metadata.actors.read_from(actors, &metadata.images).await;
     let mut context = Context::default();
     context.metadata = Rc::new(metadata);
+
+    systems::once(&mut context);
     loop {
-        clear_background(DARKGREEN);
-
-        draw_texture(&context.metadata.images.find("guy").unwrap().texture, 10.0, 10.0, WHITE);
-
+        systems::tick(&mut context);
         next_frame().await
     }
 }
