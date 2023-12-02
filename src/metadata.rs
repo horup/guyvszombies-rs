@@ -18,6 +18,7 @@ pub struct ActorInfo {
     pub index: AssetIndex,
     pub name: String,
     pub frames: Vec<FrameIndex>,
+    pub bot:bool
 }
 
 impl Asset for ActorInfo {
@@ -126,6 +127,13 @@ impl Assets<ActorInfo> {
                 v.as_integer()
             };
 
+            let get_bool = |x: &str| {
+                let Some(v) = props.get(x) else {
+                    return None;
+                };
+                v.as_bool()
+            };
+
             let get_array_string = |x: &str| {
                 let Some(v) = props.get(x) else {
                     return None;
@@ -161,7 +169,7 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => actor_info.frames,
             };
-
+            actor_info.bot = get_bool("bot").unwrap_or(actor_info.bot);
 
             self.push(actor_info);
         }

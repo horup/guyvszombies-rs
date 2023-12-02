@@ -1,4 +1,4 @@
-use std::{rc::Rc, borrow::Borrow, ops::Deref};
+use std::{rc::Rc, borrow::{Borrow, BorrowMut}, ops::{Deref, DerefMut}};
 use glam::Vec2;
 use slotmap::{new_key_type, SlotMap};
 
@@ -21,19 +21,24 @@ pub struct State {
 }
 
 
-pub struct ActorRef<A, B> {
+pub struct ActorBorrow<A, B> {
     pub handle:ActorHandle,
     pub actor:A,
     pub info:B
 }
 
-impl<A:Borrow<Actor>, B> Deref for ActorRef<A, B> {
+impl<A:Borrow<Actor>, B> Deref for ActorBorrow<A, B> {
     type Target = Actor;
     fn deref(&self) -> &Self::Target {
         self.actor.borrow()
     }
 }
 
+impl<A:BorrowMut<Actor>, B> DerefMut for ActorBorrow<A, B> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.actor.borrow_mut()
+    }
+}
 
 impl State {
     pub fn spawn_actor(&mut self, info_name:&str) -> &mut Actor {
@@ -47,10 +52,20 @@ impl State {
         self.actors.keys().collect()
     }
 
-    pub fn get_actor(&self, handle:ActorHandle) -> Option<ActorRef<&Actor, &ActorInfo>> {
+    pub fn actor(&self, handle:ActorHandle) -> Option<ActorBorrow<&Actor, &ActorInfo>> {
         let Some(actor) = self.actors.get(handle) else { return None; };
         let Some(info) = self.metadata.actors.get(actor.info) else { return None; };
-        Some(ActorRef {
+        Some(ActorBorrow {
+            handle,
+            actor,
+            info
+        })
+    }
+
+    pub fn actor_mut(&mut self, handle:ActorHandle) -> Option<ActorBorrow<&mut Actor, &ActorInfo>> {
+        let Some(actor) = self.actors.get_mut(handle) else { return None; };
+        let Some(info) = self.metadata.actors.get(actor.info) else { return None; };
+        Some(ActorBorrow {
             handle,
             actor,
             info

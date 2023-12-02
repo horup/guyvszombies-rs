@@ -3,6 +3,7 @@
 [creature]
 
 [enemy]
+bot = true
 
 [guy]
 extends = "creature"
@@ -10,3 +11,4 @@ frames = ["guy"]
 
 [zombie]
 extends = "enemy"
+frames = ["zombie"]

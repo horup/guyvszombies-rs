@@ -4,6 +4,8 @@ use crate::Context;
 
 fn start(c:&mut Context) {
     c.state.spawn_actor("guy");
+
+    c.state.spawn_actor("zombie").pos.x = 3.0;
 }
 
 pub fn once(c:&mut Context) {
@@ -21,12 +23,22 @@ pub fn camera(c:&mut Context) {
     c.camera.zoom = Vec2::new(zoom, zoom);
 }
 
+pub fn bot(c:&mut Context) {
+    let dt = get_frame_time();
+    for actor in c.state.actor_handles() {
+        let Some(mut actor) = c.state.actor_mut(actor) else { continue;} ;
+        if actor.info.bot {
+            actor.pos.x += dt;
+        }
+    }
+}
+
 pub fn draw(c:&mut Context) {
     set_camera(&c.camera);
     draw_rectangle(0.0, 0.0, screen_width(), screen_height(), DARKGRAY);
 
     for actor in c.state.actor_handles() {
-        let Some(actor) = c.state.get_actor(actor) else { continue;};
+        let Some(actor) = c.state.actor(actor) else { continue;};
         let frame = actor.info.frames[0]; 
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
@@ -41,6 +53,7 @@ pub fn draw(c:&mut Context) {
 
 pub fn tick(c:&mut Context) {
     let systems = [
+        bot,
         camera,
         draw
     ];
