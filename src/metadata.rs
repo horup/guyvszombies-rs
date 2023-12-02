@@ -13,21 +13,11 @@ pub struct FrameIndex {
     pub image:AssetIndex,
     pub frame:u16
 }
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ActorInfo {
     pub index: AssetIndex,
     pub name: String,
     pub frames: Vec<FrameIndex>,
-}
-
-impl ActorInfo {
-    pub fn new(name: String) -> Self {
-        Self {
-            index: 0,
-            name,
-            frames: Default::default(),
-        }
-    }
 }
 
 impl Asset for ActorInfo {
@@ -161,8 +151,9 @@ impl Assets<ActorInfo> {
                     .find(extends)
                     .expect("could not find base actor to extend from")
                     .clone(),
-                None => ActorInfo::new(name),
+                None => ActorInfo::default(),
             };
+            actor_info.name = name.clone();
             actor_info.frames = match get_array_string("frames") {
                 Some(frames) => frames
                     .iter()
@@ -170,6 +161,7 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => actor_info.frames,
             };
+
 
             self.push(actor_info);
         }

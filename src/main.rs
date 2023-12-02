@@ -21,7 +21,7 @@ async fn main() {
     metadata.actors.read_from(actors, &metadata.images).await;
     let mut context = Context::default();
     context.metadata = Rc::new(metadata);
-
+    context.state.metadata = context.metadata.clone();
     systems::once(&mut context);
     loop {
         systems::tick(&mut context);

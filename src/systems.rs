@@ -3,7 +3,7 @@ use crate::Context;
 
 
 fn start(c:&mut Context) {
-
+    c.state.spawn_actor("guy");
 }
 
 pub fn once(c:&mut Context) {
