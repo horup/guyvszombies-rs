@@ -19,8 +19,14 @@ pub fn once(c:&mut Context) {
 }
 
 pub fn camera(c:&mut Context) {
-    let zoom = 0.1;
-    c.camera.zoom = Vec2::new(zoom, zoom);
+    let width = screen_width();
+    let height = screen_height();
+    let aspect = width /  height;
+    let size = 12.0;
+
+    let zoom = 1.0 / size;
+
+    c.camera.zoom = Vec2::new(zoom, zoom * aspect);
 }
 
 pub fn bot(c:&mut Context) {
