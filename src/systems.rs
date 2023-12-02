@@ -16,7 +16,13 @@ pub fn once(c:&mut Context) {
     }
 }
 
+pub fn camera(c:&mut Context) {
+    let zoom = 0.1;
+    c.camera.zoom = Vec2::new(zoom, zoom);
+}
+
 pub fn draw(c:&mut Context) {
+    set_camera(&c.camera);
     draw_rectangle(0.0, 0.0, screen_width(), screen_height(), DARKGRAY);
 
     for actor in c.state.actor_handles() {
@@ -35,6 +41,7 @@ pub fn draw(c:&mut Context) {
 
 pub fn tick(c:&mut Context) {
     let systems = [
+        camera,
         draw
     ];
     for system in systems.iter() {
