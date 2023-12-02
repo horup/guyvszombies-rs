@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use macroquad::{ui::widgets::Texture, texture::load_texture};
+use macroquad::{texture::{load_texture, Texture2D}};
 
 pub struct ImageInfo {
     pub index:u16,
     pub name:String,
     pub path:String,
-    pub texture:Texture
+    pub texture:Texture2D
 }
 
 impl Asset for ImageInfo {
@@ -60,7 +60,12 @@ impl Assets<ImageInfo> {
             let path = v.as_str().unwrap();
             let path = "assets/".to_string() + path;
             let texture = load_texture(&path).await.expect("failed to load texture");
-            self.push(ImageI)
+            self.push(ImageInfo {
+                index: 0,
+                name: key.clone(),
+                path: path.clone(),
+                texture: texture,
+            });
         }
     }
 }
