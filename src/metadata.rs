@@ -8,7 +8,7 @@ pub struct ImageInfo {
     pub texture: Texture2D,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct FrameIndex {
     pub image:AssetIndex,
     pub frame:u16
