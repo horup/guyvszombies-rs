@@ -6,7 +6,7 @@
 
 [guy]
 extends = "creature"
-frames = ["guy.png"]
+frames = ["guy"]
 
 [zombie]
 extends = "enemy"
