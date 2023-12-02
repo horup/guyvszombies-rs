@@ -1,5 +1,4 @@
 use std::rc::Rc;
-
 use macroquad::prelude::*;
 mod metadata;
 pub use metadata::*;
@@ -7,6 +6,8 @@ mod context;
 pub use context::*;
 mod state;
 pub use state::*;
+mod systems;
+pub use systems::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
