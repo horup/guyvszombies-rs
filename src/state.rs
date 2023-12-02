@@ -19,3 +19,12 @@ pub struct State {
     pub actors:SlotMap<ActorHandle, Actor>,
     pub metadata:Rc<Metadata>
 }
+
+impl State {
+    pub fn spawn_actor(&mut self, actor_info:&str) -> &mut Actor {
+        let actor_info = self.metadata.actors.find("guy").expect("could not find actor info");
+        let actor = Actor { info:actor_info.index, pos:[0.0, 0.0].into() };
+        let handle = self.actors.insert(actor);
+        return self.actors.get_mut(handle).unwrap();
+    }
+}
