@@ -5,6 +5,9 @@ mod metadata;
 pub use metadata::*;
 mod context;
 pub use context::*;
+mod state;
+pub use state::*;
+
 #[macroquad::main("BasicShapes")]
 async fn main() {
     let images = String::from_utf8(load_file("assets/images.toml").await.unwrap()).unwrap();

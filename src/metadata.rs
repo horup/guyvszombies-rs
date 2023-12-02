@@ -9,10 +9,15 @@ pub struct ImageInfo {
 }
 
 #[derive(Clone)]
+pub struct FrameIndex {
+    pub image:AssetIndex,
+    pub frame:u16
+}
+#[derive(Clone)]
 pub struct ActorInfo {
     pub index: AssetIndex,
     pub name: String,
-    pub frames: Vec<AssetIndex>,
+    pub frames: Vec<FrameIndex>,
 }
 
 impl ActorInfo {
@@ -161,7 +166,7 @@ impl Assets<ActorInfo> {
             actor_info.frames = match get_array_string("frames") {
                 Some(frames) => frames
                     .iter()
-                    .map(|frame| images.find(&frame).expect("frame was not found").index)
+                    .map(|frame| FrameIndex { image: images.find(&frame).expect("frame was not found").index, frame: 0 })
                     .collect(),
                 None => actor_info.frames,
             };

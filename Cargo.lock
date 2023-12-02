@@ -411,6 +411,7 @@ name = "v"
 version = "0.1.0"
 dependencies = [
  "macroquad",
+ "slotmap",
  "toml",
 ]
 
