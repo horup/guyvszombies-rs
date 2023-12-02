@@ -1,1 +1,4 @@
 guy = "images/guy.png"
+bullet = "images/bullet.png"
+spatter = "images/spatter.png"
+zombie = "images/zombie.png"

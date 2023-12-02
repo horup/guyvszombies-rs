@@ -1,11 +1,18 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, default};
 use macroquad::texture::{Texture2D, load_texture};
-
+pub type AssetIndex = u16;
 pub struct ImageInfo {
-    pub index:u16,
+    pub index:AssetIndex,
     pub name:String,
     pub path:String,
     pub texture:Texture2D
+}
+
+#[derive(Default)]
+pub struct ActorInfo {
+    pub index:AssetIndex,
+    pub name:String,
+    pub frames:Vec<AssetIndex>
 }
 
 impl Asset for ImageInfo {
@@ -13,18 +20,18 @@ impl Asset for ImageInfo {
         &self.name
     }
 
-    fn index(&self) -> u16 {
+    fn index(&self) -> AssetIndex {
         self.index
     }
 
-    fn set_index(&mut self, index:u16) {
+    fn set_index(&mut self, index:AssetIndex) {
         self.index = index;
     }
 }
 
 pub struct Assets<T> {
     inner:Vec<T>,
-    name_to_index:HashMap<String, u16>
+    name_to_index:HashMap<String, AssetIndex>
 }
 
 impl<T> Default for Assets<T> {
@@ -34,7 +41,7 @@ impl<T> Default for Assets<T> {
 }
 
 impl<T> Assets<T> {
-    pub fn get(&self, index:u16) -> Option<&T> {
+    pub fn get(&self, index:AssetIndex) -> Option<&T> {
         self.inner.get(index as usize)
     }
 }
@@ -46,7 +53,7 @@ impl<T:Asset> Assets<T> {
     }
 
     pub fn push(&mut self, mut t:T) {
-        let index = self.inner.len() as u16;
+        let index = self.inner.len() as AssetIndex;
         self.name_to_index.insert(t.name().to_string(), index);
         t.set_index(index);
         self.inner.push(t);
@@ -69,6 +76,14 @@ impl Assets<ImageInfo> {
     }
 }
 
+impl Assets<ActorInfo> {
+    pub async fn read_from(&mut self, table:toml::Table, images:&Assets<ImageInfo>) {
+        for (name, props) in table {
+            dbg!(name);
+        }
+    }
+}
+
 pub trait Asset {
     fn name(&self) -> &str;
     fn index(&self) -> u16;
@@ -77,6 +92,7 @@ pub trait Asset {
 
 #[derive(Default)]
 pub struct Metadata {
-    pub images:Assets<ImageInfo>
+    pub images:Assets<ImageInfo>,
+    pub actors:Assets<ActorInfo>
 }
 

@@ -1,0 +1,12 @@
+[decoration]
+
+[creature]
+
+[enemy]
+
+[guy]
+extends = "creature"
+frames = ["guy.png"]
+
+[zombie]
+extends = "enemy"
