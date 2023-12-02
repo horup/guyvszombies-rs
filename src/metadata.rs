@@ -1,6 +1,5 @@
 use std::collections::HashMap;
-
-use macroquad::{texture::{load_texture, Texture2D}};
+use macroquad::texture::{Texture2D, load_texture};
 
 pub struct ImageInfo {
     pub index:u16,
