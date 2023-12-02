@@ -91,6 +91,7 @@ impl Assets<ImageInfo> {
             let path = v.as_str().unwrap();
             let path = "assets/".to_string() + path;
             let texture = load_texture(&path).await.expect("failed to load texture");
+            texture.set_filter(macroquad::miniquad::FilterMode::Nearest);
             self.push(ImageInfo {
                 index: 0,
                 name: key.clone(),
