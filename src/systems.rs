@@ -80,7 +80,7 @@ fn apply_locomotion(c:&mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let mut actor = c.state.actor_mut(handle).unwrap();
-        let speed = 5.0;
+        let speed = actor.info.speed;
         let max_acceleration = speed * speed * dt;
         let desired_vel = actor.locomotion * speed;
         let delta_vel = desired_vel - actor.vel;

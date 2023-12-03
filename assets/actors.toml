@@ -1,6 +1,7 @@
 [decoration]
 
 [creature]
+speed = 3.0
 
 [enemy]
 bot = true
@@ -8,6 +9,7 @@ bot = true
 [guy]
 extends = "creature"
 frames = ["guy"]
+speed = 5.0
 
 [zombie]
 extends = "enemy"

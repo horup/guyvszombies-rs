@@ -10,15 +10,16 @@ pub struct ImageInfo {
 
 #[derive(Clone, Copy)]
 pub struct FrameIndex {
-    pub image:AssetIndex,
-    pub frame:u16
+    pub image: AssetIndex,
+    pub frame: u16,
 }
 #[derive(Clone, Default)]
 pub struct ActorInfo {
     pub index: AssetIndex,
     pub name: String,
     pub frames: Vec<FrameIndex>,
-    pub bot:bool
+    pub bot: bool,
+    pub speed: f32,
 }
 
 impl Asset for ActorInfo {
@@ -155,23 +156,30 @@ impl Assets<ActorInfo> {
             };
 
             let extends = get_string("extends");
-            let mut actor_info: ActorInfo = match extends {
+            let base: ActorInfo = match extends {
                 Some(extends) => self
                     .find(extends)
                     .expect("could not find base actor to extend from")
                     .clone(),
                 None => ActorInfo::default(),
             };
-            actor_info.name = name.clone();
-            actor_info.frames = match get_array_string("frames") {
+            let frames = match get_array_string("frames") {
                 Some(frames) => frames
                     .iter()
-                    .map(|frame| FrameIndex { image: images.find(&frame).expect("frame was not found").index, frame: 0 })
+                    .map(|frame| FrameIndex {
+                        image: images.find(&frame).expect("frame was not found").index,
+                        frame: 0,
+                    })
                     .collect(),
-                None => actor_info.frames,
+                None => base.frames,
             };
-            actor_info.bot = get_bool("bot").unwrap_or(actor_info.bot);
-
+            let actor_info = ActorInfo {
+                index: 0,
+                name: name.clone(),
+                frames,
+                bot: get_bool("bot").unwrap_or(base.bot),
+                speed: get_f32("speed").unwrap_or(base.speed),
+            };
             self.push(actor_info);
         }
     }
