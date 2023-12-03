@@ -15,20 +15,12 @@ new_key_type! {
 #[derive(Default, Clone)]
 pub struct Clock {
     pub tick:f32,
-    pub current_tick:f32
 }
 impl Clock {
-    pub fn new(tick:f32) -> Self {
-        Self {
-            tick,
-            current_tick:0.0
-        }
-    }
-
-    pub fn tick(&mut self, dt:f32) -> bool {
-        self.current_tick += dt;
-        if self.current_tick >= self.tick {
-            self.current_tick = 0.0;
+    pub fn tick(&mut self, dt:f32, reset_at:f32) -> bool {
+        self.tick += dt;
+        if self.tick > reset_at {
+            self.tick = 0.0;
             return true;
         }
 
@@ -47,6 +39,7 @@ pub struct Actor {
 
 #[derive(Default)]
 pub struct State {
+    pub spawner:Clock,
     pub me:ActorHandle,
     pub actors: SlotMap<ActorHandle, Actor>,
     pub metadata: Rc<Metadata>,

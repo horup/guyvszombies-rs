@@ -4,12 +4,10 @@ use macroquad::prelude::*;
 fn start(c: &mut Context) {
     let player = c.state.spawn_actor("guy");
     c.state.me = player.handle;
-    c.state.spawn_actor("zombie").pos.x = 4.0;
 }
 
 pub fn once(c: &mut Context) {
     let systems = [start];
-
     for system in systems.iter() {
         system(c);
     }
@@ -196,8 +194,23 @@ fn attack(c:&mut Context) {
     }
 }
 
+pub fn spawner(c:&mut Context) {
+    let dt = get_frame_time();
+    if c.state.spawner.tick(dt, 1.0) {
+        let r = macroquad::rand::rand() / 365;
+        let r = r as f32;
+        let r = r / 365.0;
+        let x = r.cos();
+        let y = r.sin();
+        let r = 8.0;
+        let v = Vec2::new(x * r, y * r);
+        c.state.spawn_actor("zombie").pos = v;
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
+        spawner,
         camera,
         input_player,
         input_bot,
