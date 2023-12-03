@@ -20,6 +20,7 @@ pub struct ActorInfo {
     pub frames: Vec<FrameIndex>,
     pub bot: bool,
     pub speed: f32,
+    pub radius:f32
 }
 
 impl Asset for ActorInfo {
@@ -179,6 +180,7 @@ impl Assets<ActorInfo> {
                 frames,
                 bot: get_bool("bot").unwrap_or(base.bot),
                 speed: get_f32("speed").unwrap_or(base.speed),
+                radius: get_f32("radius").unwrap_or(base.radius)
             };
             self.push(actor_info);
         }
