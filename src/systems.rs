@@ -29,9 +29,22 @@ pub fn camera(c: &mut Context) {
 pub fn input_bot(c: &mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
-        let Some(mut actor) = c.state.actor_mut(actor) else {
+        let Some(mut bot) = c.state.actor(actor) else {
             continue;
         };
+
+        if bot.info.bot == false {
+            continue;
+        }
+
+        let Some(player) = c.state.actor(c.state.me) else {
+            continue;
+        };
+
+        let v = player.pos - bot.pos;
+        let d = v.normalize_or_zero();
+        let mut bot = c.state.actor_mut(actor).unwrap();
+        bot.locomotion = d;
     }
 }
 
@@ -140,7 +153,6 @@ fn apply_vel(c: &mut Context) {
 
                 let push_back = Vec2::new(contact.normal1.x, contact.normal1.y) * contact.dist;
                 new_pos = new_pos + push_back;
-
             }
         }
 
