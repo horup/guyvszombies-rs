@@ -13,6 +13,30 @@ new_key_type! {
 }
 
 #[derive(Default, Clone)]
+pub struct Clock {
+    pub tick:f32,
+    pub current_tick:f32
+}
+impl Clock {
+    pub fn new(tick:f32) -> Self {
+        Self {
+            tick,
+            current_tick:0.0
+        }
+    }
+
+    pub fn tick(&mut self, dt:f32) -> bool {
+        self.current_tick += dt;
+        if self.current_tick >= self.tick {
+            self.current_tick = 0.0;
+            return true;
+        }
+
+        return false;
+    }
+}
+
+#[derive(Default, Clone)]
 pub struct Actor {
     pub info: AssetIndex,
     pub pos: Vec2,
