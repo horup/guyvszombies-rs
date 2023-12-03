@@ -16,3 +16,11 @@ speed = 5.0
 [zombie]
 extends = "enemy"
 frames = ["zombie"]
+
+
+[projectile]
+
+
+[bullet]
+extends = "projectile"
+frames = ["bullet"]

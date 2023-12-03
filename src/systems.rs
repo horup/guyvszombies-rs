@@ -42,7 +42,7 @@ pub fn input_bot(c: &mut Context) {
         let v = player.pos - bot.pos;
         let d = v.normalize_or_zero();
         let mut bot = c.state.actor_mut(actor).unwrap();
-        bot.locomotion = d;
+        bot.locomotion_dir = d;
     }
 }
 
@@ -91,11 +91,26 @@ fn input_player(c: &mut Context) {
         d.y = 1.0;
     }
 
+    let mut attack_dir = Vec2::new(0.0, 0.0);
+    if is_key_down(KeyCode::Left) {
+        attack_dir.x = -1.0;
+    }
+    if is_key_down(KeyCode::Right) {
+        attack_dir.x = 1.0;
+    }
+    if is_key_down(KeyCode::Up) {
+        attack_dir.y = -1.0;
+    }
+    if is_key_down(KeyCode::Down) {
+        attack_dir.y = 1.0;
+    }
+
     let d = d.normalize_or_zero();
     let Some(mut player) = c.state.actor_mut(c.state.me) else {
         return;
     };
-    player.locomotion = d;
+    player.attack_dir = attack_dir;
+    player.locomotion_dir = d;
 }
 
 fn apply_locomotion(c: &mut Context) {
@@ -104,7 +119,7 @@ fn apply_locomotion(c: &mut Context) {
         let mut actor = c.state.actor_mut(handle).unwrap();
         let speed = actor.info.speed;
         let max_acceleration = speed * speed * dt;
-        let desired_vel = actor.locomotion * speed;
+        let desired_vel = actor.locomotion_dir * speed;
         let delta_vel = desired_vel - actor.vel;
         let delta_len = delta_vel.length();
         let delta_dir = delta_vel.normalize_or_zero();
@@ -159,11 +174,27 @@ fn apply_vel(c: &mut Context) {
     }
 }
 
+fn attack(c:&mut Context) {
+    for actor in c.state.actor_handles() {
+        let Some(actor) = c.state.actor(actor) else { continue;};
+        if actor.attack_dir.length() > 0.0 {
+            let pos = actor.pos;
+            let d = actor.attack_dir;
+            let r = actor.info.radius;
+
+            let speed = 10.0;
+            let spawn_pos = pos + d * r;
+            c.state.spawn_actor("zombie").pos = spawn_pos;
+        }
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         camera,
         input_player,
         input_bot,
+        attack,
         apply_locomotion,
         apply_vel,
         draw,

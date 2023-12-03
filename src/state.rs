@@ -40,8 +40,9 @@ impl Clock {
 pub struct Actor {
     pub info: AssetIndex,
     pub pos: Vec2,
-    pub locomotion: Vec2,
+    pub locomotion_dir: Vec2,
     pub vel: Vec2,
+    pub attack_dir:Vec2
 }
 
 #[derive(Default)]
@@ -80,8 +81,9 @@ impl State {
         let actor = Actor {
             info: actor_info.index,
             pos: [0.0, 0.0].into(),
-            locomotion: Default::default(),
+            locomotion_dir: Default::default(),
             vel: Default::default(),
+            attack_dir: Default::default(),
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()
