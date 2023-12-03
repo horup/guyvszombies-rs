@@ -27,16 +27,14 @@ pub fn camera(c: &mut Context) {
 }
 
 pub fn input_bot(c: &mut Context) {
-    let dt = get_frame_time();
+    //let dt: f32 = get_frame_time();
     for actor in c.state.actor_handles() {
         let Some(mut bot) = c.state.actor(actor) else {
             continue;
         };
-
         if bot.info.bot == false {
             continue;
         }
-
         let Some(player) = c.state.actor(c.state.me) else {
             continue;
         };
