@@ -11,3 +11,4 @@ toml = {version = "0.8.8", features = ["preserve_order"]}
 slotmap = "1.0.7"
 glam = {version = "0.21.3", features = ["scalar-math"] }
 parry2d = "0.13.5"
+flat_spatial = "0.6.0"

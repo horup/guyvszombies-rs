@@ -129,19 +129,26 @@ fn apply_locomotion(c: &mut Context) {
 }
 
 fn apply_vel(c: &mut Context) {
+    let mut actor_handles = c.state.actor_handles();
+    let mut spatial = flat_spatial::Grid::new(1);
+    for handle in actor_handles.iter() {
+        let pos = c.state.actor(*handle).unwrap().pos;
+        spatial.insert([pos.x, pos.y], *handle);
+    }
     // TODO apply substeps
     let dt = get_frame_time();
-    let actor_handles = c.state.actor_handles();
-    for handle in actor_handles.iter() {
-        let actor = c.state.actor(*handle).unwrap();
+    for handle in actor_handles.drain(..) {
+        let actor = c.state.actor(handle).unwrap();
         let vel = actor.vel;
         let pos = actor.pos;
         let mut new_pos = pos + vel * dt;
 
         let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
-        for handle2 in actor_handles.iter() {
+        let q = spatial.query_around([pos.x, pos.y], 2.0);
+        for (handle2,_) in q {
+            let handle2 = *spatial.get(handle2).unwrap().1;
             if handle != handle2 {
-                let actor2 = c.state.actor(*handle2).unwrap();
+                let actor2 = c.state.actor(handle2).unwrap();
                 let shape2 =
                     parry2d::shape::Cuboid::new([actor2.info.radius, actor2.info.radius].into());
 
@@ -169,7 +176,7 @@ fn apply_vel(c: &mut Context) {
             }
         }
 
-        let mut actor = c.state.actor_mut(*handle).unwrap();
+        let mut actor = c.state.actor_mut(handle).unwrap();
         actor.pos = new_pos;
     }
 }
