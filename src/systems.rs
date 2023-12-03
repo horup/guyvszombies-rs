@@ -180,16 +180,19 @@ fn apply_vel(c: &mut Context) {
 }
 
 fn attack(c:&mut Context) {
+    let dt = get_frame_time();
     for actor in c.state.actor_handles() {
-        let Some(actor) = c.state.actor(actor) else { continue;};
+        let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
+        actor.attack_cooldown.tick(dt);
         if actor.attack_dir.length() > 0.0 {
-            let pos = actor.pos;
-            let d = actor.attack_dir;
-            let r = actor.info.radius;
-
-            let speed = 10.0;
-            let spawn_pos = pos + d * r;
-            c.state.spawn_actor("bullet").pos = spawn_pos;
+            if actor.attack_cooldown.activate(0.2) {
+                let pos = actor.pos;
+                let d = actor.attack_dir;
+                let r = actor.info.radius;
+                let speed = 10.0;
+                let spawn_pos = pos + d * r;
+                c.state.spawn_actor("bullet").pos = spawn_pos;
+            }
         }
     }
 }

@@ -13,6 +13,29 @@ new_key_type! {
 }
 
 #[derive(Default, Clone)]
+pub struct Cooldown {
+    pub heat:f32
+}
+
+impl Cooldown {
+    pub fn tick(&mut self, dt:f32) {
+        self.heat -= dt;
+        if self.heat < 0.0 {
+            self.heat = 0.0;
+        }
+    }
+
+    pub fn activate(&mut self, heat:f32) -> bool {
+        if self.heat == 0.0 {
+            self.heat = heat;
+            return  true;
+        }
+
+        return false;
+    }
+}
+
+#[derive(Default, Clone)]
 pub struct Clock {
     pub tick:f32,
 }
@@ -34,7 +57,8 @@ pub struct Actor {
     pub pos: Vec2,
     pub locomotion_dir: Vec2,
     pub vel: Vec2,
-    pub attack_dir:Vec2
+    pub attack_dir:Vec2,
+    pub attack_cooldown:Cooldown
 }
 
 #[derive(Default)]
@@ -77,6 +101,7 @@ impl State {
             locomotion_dir: Default::default(),
             vel: Default::default(),
             attack_dir: Default::default(),
+            attack_cooldown: Default::default(),
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()
