@@ -2,9 +2,10 @@
 
 [creature]
 speed = 3.0
-radius = 0.4
+radius = 0.5
 
 [enemy]
+extends = "creature"
 bot = true
 
 [guy]

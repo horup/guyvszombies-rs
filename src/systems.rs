@@ -1,26 +1,24 @@
-use macroquad::prelude::*;
 use crate::Context;
+use macroquad::prelude::*;
 
-
-fn start(c:&mut Context) {
+fn start(c: &mut Context) {
     let player = c.state.spawn_actor("guy");
     c.state.me = player.handle;
+    c.state.spawn_actor("zombie").pos.x = 4.0;
 }
 
-pub fn once(c:&mut Context) {
-    let systems = [
-        start
-    ];
+pub fn once(c: &mut Context) {
+    let systems = [start];
 
     for system in systems.iter() {
         system(c);
     }
 }
 
-pub fn camera(c:&mut Context) {
+pub fn camera(c: &mut Context) {
     let width = screen_width();
     let height = screen_height();
-    let aspect = width /  height;
+    let aspect = width / height;
     let size = 12.0;
 
     let zoom = 1.0 / size;
@@ -28,36 +26,46 @@ pub fn camera(c:&mut Context) {
     c.camera.zoom = Vec2::new(zoom, zoom * aspect);
 }
 
-pub fn input_bot(c:&mut Context) {
+pub fn input_bot(c: &mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
-        let Some(mut actor) = c.state.actor_mut(actor) else { continue;} ;
-        if actor.info.bot {
-            actor.pos.x += dt;
-        }
+        let Some(mut actor) = c.state.actor_mut(actor) else {
+            continue;
+        };
     }
 }
 
-pub fn draw(c:&mut Context) {
+pub fn draw(c: &mut Context) {
     set_camera(&c.camera);
     let s = 32.0;
     draw_rectangle(-s / 2.0, -s / 2.0, s, s, DARKGRAY);
 
     for actor in c.state.actor_handles() {
-        let Some(actor) = c.state.actor(actor) else { continue;};
-        let frame = actor.info.frames[0]; 
+        let Some(actor) = c.state.actor(actor) else {
+            continue;
+        };
+        let frame = actor.info.frames[0];
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
-       
+
         let color = WHITE;
         let size = Vec2::new(1.0, 1.0);
         let x = actor.pos.x - size.x / 2.0;
-        let y = actor.pos.y / size.y / 2.0;
-        draw_texture_ex(texture, x, y, color, DrawTextureParams { dest_size:Some(size), ..Default::default() });
+        let y = actor.pos.y - size.y / 2.0;
+        draw_texture_ex(
+            texture,
+            x,
+            y,
+            color,
+            DrawTextureParams {
+                dest_size: Some(size),
+                ..Default::default()
+            },
+        );
     }
 }
 
-fn input_player(c:&mut Context) {
+fn input_player(c: &mut Context) {
     let mut d = Vec2::new(0.0, 0.0);
     if is_key_down(KeyCode::A) {
         d.x = -1.0;
@@ -73,11 +81,13 @@ fn input_player(c:&mut Context) {
     }
 
     let d = d.normalize_or_zero();
-    let Some(mut player) = c.state.actor_mut(c.state.me) else { return; };
+    let Some(mut player) = c.state.actor_mut(c.state.me) else {
+        return;
+    };
     player.locomotion = d;
 }
 
-fn apply_locomotion(c:&mut Context) {
+fn apply_locomotion(c: &mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let mut actor = c.state.actor_mut(handle).unwrap();
@@ -92,27 +102,60 @@ fn apply_locomotion(c:&mut Context) {
     }
 }
 
-fn apply_vel(c:&mut Context) {
+fn apply_vel(c: &mut Context) {
     let dt = get_frame_time();
-    for handle in c.state.actor_handles() {
-        let actor = c.state.actor(handle).unwrap();
+    let actor_handles = c.state.actor_handles();
+    for handle in actor_handles.iter() {
+        let actor = c.state.actor(*handle).unwrap();
         let vel = actor.vel;
         let pos = actor.pos;
-        let new_pos = pos + vel * dt;
+        let mut new_pos = pos + vel * dt;
 
-        let mut actor = c.state.actor_mut(handle).unwrap();
+        let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
+        for handle2 in actor_handles.iter() {
+            if handle != handle2 {
+                let actor2 = c.state.actor(*handle2).unwrap();
+                let shape2 =
+                    parry2d::shape::Cuboid::new([actor2.info.radius, actor2.info.radius].into());
+
+                let contact = parry2d::query::contact(
+                    &[new_pos.x, new_pos.y].into(),
+                    &shape,
+                    &[actor2.pos.x, actor2.pos.y].into(),
+                    &shape2,
+                    2.0,
+                );
+
+                let Ok(contact) = contact else {
+                    continue;
+                };
+                let Some(contact) = contact else {
+                    continue;
+                };
+
+                if contact.dist > 0.0 {
+                    continue;
+                };
+
+                let push_back = Vec2::new(contact.normal1.x, contact.normal1.y) * contact.dist;
+                new_pos = new_pos + push_back;
+
+            }
+        }
+
+        let mut actor = c.state.actor_mut(*handle).unwrap();
         actor.pos = new_pos;
     }
 }
 
-pub fn tick(c:&mut Context) {
+pub fn tick(c: &mut Context) {
     let systems = [
         camera,
         input_player,
         input_bot,
         apply_locomotion,
         apply_vel,
-        draw
+        draw,
     ];
     for system in systems.iter() {
         system(c);
