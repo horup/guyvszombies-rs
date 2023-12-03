@@ -5,7 +5,6 @@ use crate::Context;
 fn start(c:&mut Context) {
     let player = c.state.spawn_actor("guy");
     c.state.me = player.handle;
-    c.state.spawn_actor("zombie").pos.x = 3.0;
 }
 
 pub fn once(c:&mut Context) {
@@ -74,19 +73,31 @@ fn input_player(c:&mut Context) {
 
     let d = d.normalize_or_zero();
     let Some(mut player) = c.state.actor_mut(c.state.me) else { return; };
-    player.vel = d;
+    player.locomotion = d;
 }
 
 fn apply_locomotion(c:&mut Context) {
-
+    let dt = get_frame_time();
+    for handle in c.state.actor_handles() {
+        let mut actor = c.state.actor_mut(handle).unwrap();
+        let speed = 5.0;
+        let max_acceleration = speed * speed * dt;
+        let desired_vel = actor.locomotion * speed;
+        let delta_vel = desired_vel - actor.vel;
+        let delta_len = delta_vel.length();
+        let delta_dir = delta_vel.normalize_or_zero();
+        let add_speed = delta_len.min(max_acceleration);
+        actor.vel = actor.vel + delta_dir * add_speed;
+    }
 }
 
 fn apply_vel(c:&mut Context) {
+    let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let actor = c.state.actor(handle).unwrap();
         let vel = actor.vel;
         let pos = actor.pos;
-        let new_pos = pos + vel;
+        let new_pos = pos + vel * dt;
 
         let mut actor = c.state.actor_mut(handle).unwrap();
         actor.pos = new_pos;
