@@ -25,6 +25,8 @@ async fn main() {
     systems::once(&mut context);
     loop {
         systems::tick(&mut context);
+        set_default_camera();
+        draw_text(&format!("{}", get_fps()), 12.0, 12.0, 16.0, RED);
         next_frame().await
     }
 }
