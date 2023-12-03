@@ -19,7 +19,7 @@ frames = ["zombie"]
 
 
 [projectile]
-
+radius = 0.2
 
 [bullet]
 extends = "projectile"

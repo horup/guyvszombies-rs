@@ -189,7 +189,7 @@ fn attack(c:&mut Context) {
 
             let speed = 10.0;
             let spawn_pos = pos + d * r;
-            c.state.spawn_actor("zombie").pos = spawn_pos;
+            c.state.spawn_actor("bullet").pos = spawn_pos;
         }
     }
 }
