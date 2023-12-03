@@ -26,7 +26,8 @@ async fn main() {
     loop {
         systems::tick(&mut context);
         set_default_camera();
-        draw_text(&format!("{}", get_fps()), 12.0, 12.0, 16.0, RED);
+        let font_size = 24.0;
+        draw_text(&format!("{}", get_fps()), font_size, font_size, font_size, RED);
         next_frame().await
     }
 }

@@ -40,7 +40,8 @@ pub fn input_bot(c:&mut Context) {
 
 pub fn draw(c:&mut Context) {
     set_camera(&c.camera);
-    draw_rectangle(0.0, 0.0, screen_width(), screen_height(), DARKGRAY);
+    let s = 32.0;
+    draw_rectangle(-s / 2.0, -s / 2.0, s, s, DARKGRAY);
 
     for actor in c.state.actor_handles() {
         let Some(actor) = c.state.actor(actor) else { continue;};
