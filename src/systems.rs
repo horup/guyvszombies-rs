@@ -195,7 +195,7 @@ fn attack(c:&mut Context) {
                 let pos = actor.pos;
                 let d = actor.attack_dir;
                 let r = actor.info.radius + 0.3;
-                let speed = 10.0;
+                let speed = 20.0;
                 let spawn_pos = pos + d * r;
                 let v = d * speed;
                 let mut bullet = c.state.spawn_actor("bullet");
