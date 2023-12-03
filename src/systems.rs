@@ -103,6 +103,7 @@ fn apply_locomotion(c: &mut Context) {
 }
 
 fn apply_vel(c: &mut Context) {
+    // TODO apply substeps
     let dt = get_frame_time();
     let actor_handles = c.state.actor_handles();
     for handle in actor_handles.iter() {
