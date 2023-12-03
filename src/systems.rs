@@ -138,6 +138,7 @@ fn apply_vel(c: &mut Context) {
     for handle in actor_handles.drain(..) {
         let actor = c.state.actor(handle).unwrap();
         let vel = actor.vel;
+        if vel.length() == 0.0 { continue; };
         let pos = actor.pos;
         let mut new_pos = pos + vel * dt;
 
@@ -147,9 +148,14 @@ fn apply_vel(c: &mut Context) {
             let handle2 = *spatial.get(handle2).unwrap().1;
             if handle != handle2 {
                 let actor2 = c.state.actor(handle2).unwrap();
+                let v = actor2.pos - actor.pos;
+                let v = v.normalize_or_zero();
+                if v.dot(vel) < 0.0 { continue;};
+
                 let shape2 =
                     parry2d::shape::Cuboid::new([actor2.info.radius, actor2.info.radius].into());
 
+                
                 let contact = parry2d::query::contact(
                     &[new_pos.x, new_pos.y].into(),
                     &shape,
@@ -188,10 +194,13 @@ fn attack(c:&mut Context) {
             if actor.attack_cooldown.activate(0.2) {
                 let pos = actor.pos;
                 let d = actor.attack_dir;
-                let r = actor.info.radius;
+                let r = actor.info.radius + 0.3;
                 let speed = 10.0;
                 let spawn_pos = pos + d * r;
-                c.state.spawn_actor("bullet").pos = spawn_pos;
+                let v = d * speed;
+                let mut bullet = c.state.spawn_actor("bullet");
+                bullet.pos = spawn_pos;
+                bullet.vel = v;
             }
         }
     }
