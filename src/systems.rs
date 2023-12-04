@@ -260,8 +260,14 @@ pub fn missile_contact(c:&mut Context) {
         }
     }
 
-    for (actor, dmg) in hits.drain(..) {
-        let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
+    for (actor_handle, dmg) in hits.drain(..) {
+        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue;};
+        actor.health -= dmg;
+        actor.pain_timer.restart();
+
+        if actor.health <= 0.0 {
+            c.state.despawn_actor(actor_handle);
+        }
     }
 }
 
@@ -280,6 +286,23 @@ fn particle(c:&mut Context) {
     }
 }
 
+fn pain_timer(c:&mut Context) {
+    let dt = get_frame_time();
+    for actor_handle in c.state.actor_handles() {
+        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; }; {
+            actor.pain_timer.tick(dt);
+            let mut a = actor.pain_timer.alpha();
+            if a < 0.5 {
+                a = 0.0;
+            } else {
+                a = 1.0;
+            }
+            actor.color.y = a;
+            actor.color.z = a;
+        }
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         spawner,
@@ -291,6 +314,7 @@ pub fn tick(c: &mut Context) {
         apply_vel,
         missile_contact,
         particle,
+        pain_timer,
         draw,
     ];
     for system in systems.iter() {

@@ -14,22 +14,26 @@ new_key_type! {
 
 #[derive(Default, Clone)]
 pub struct Timer {
-    pub time:f32,
+    pub timer:f32,
     pub end_time:f32
 }
 
 impl Timer {
     pub fn new(end_time:f32) -> Self {
         Self {
-            time: 0.0,
+            timer: end_time,
             end_time,
         }
     }
 
+    pub fn restart(&mut self) {
+        self.timer = 0.0;
+    }
+
     pub fn tick(&mut self, dt:f32) {
-        self.time += dt;
-        if self.time > self.end_time {
-            self.time = self.end_time;
+        self.timer += dt;
+        if self.timer > self.end_time {
+            self.timer = self.end_time;
         }
     }
 
@@ -38,7 +42,7 @@ impl Timer {
             return 0.0;
         }
 
-        self.time / self.end_time
+        self.timer / self.end_time
     }
 }
 
@@ -91,7 +95,8 @@ pub struct Actor {
     pub attack_cooldown:Cooldown,
     pub owner:ActorHandle,
     pub health:f32,
-    pub color:Vec4
+    pub color:Vec4,
+    pub pain_timer:Timer
 }
 
 #[derive(Clone)]
@@ -149,7 +154,8 @@ impl State {
             attack_cooldown: Default::default(),
             owner: Default::default(),
             health: actor_info.health,
-            color:Vec4::new(1.0, 1.0, 1.0, 1.0)
+            color:Vec4::new(1.0, 1.0, 1.0, 1.0),
+            pain_timer:Timer::new(0.25)
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()
