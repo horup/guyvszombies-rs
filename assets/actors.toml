@@ -3,6 +3,7 @@
 [creature]
 speed = 3.0
 radius = 0.5
+alive = true
 
 [enemy]
 extends = "creature"
@@ -16,7 +17,6 @@ speed = 5.0
 [zombie]
 extends = "enemy"
 frames = ["zombie"]
-
 
 [missile]
 radius = 0.2
