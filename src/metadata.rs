@@ -21,7 +21,9 @@ pub struct ActorInfo {
     pub bot: bool,
     pub speed: f32,
     pub radius:f32,
-    pub missile:bool
+    pub missile:bool,
+    pub shootable:bool,
+    pub health:f32
 }
 
 impl Asset for ActorInfo {
@@ -183,6 +185,8 @@ impl Assets<ActorInfo> {
                 speed: get_f32("speed").unwrap_or(base.speed),
                 radius: get_f32("radius").unwrap_or(base.radius),
                 missile: get_bool("missile").unwrap_or(base.missile),
+                shootable: get_bool("shootable").unwrap_or(base.shootable),
+                health: get_f32("health").unwrap_or(base.health)
             };
             self.push(actor_info);
         }

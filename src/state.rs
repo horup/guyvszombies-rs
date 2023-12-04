@@ -59,7 +59,8 @@ pub struct Actor {
     pub vel: Vec2,
     pub attack_dir:Vec2,
     pub attack_cooldown:Cooldown,
-    pub owner:ActorHandle
+    pub owner:ActorHandle,
+    pub health:f32
 }
 
 #[derive(Clone)]
@@ -116,6 +117,7 @@ impl State {
             attack_dir: Default::default(),
             attack_cooldown: Default::default(),
             owner: Default::default(),
+            health: actor_info.health
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()

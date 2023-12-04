@@ -226,16 +226,25 @@ pub fn spawner(c:&mut Context) {
 
 pub fn missile_contact(c:&mut Context) {
     let contacts = c.state.contact_events.clone();
+    let mut hits = Vec::new();
     for ev in contacts.iter() {
         match ev {
             ContactEvent::Actor { actor, other_actor } => {
                 let Some(actor) = c.state.actor(*actor) else { continue;};
                 if actor.info.missile {
                     let Some(other_actor) = c.state.actor(*other_actor) else { continue;};
+                    if other_actor.info.shootable {
+                        hits.push((other_actor.handle, 10.0));
+                    }
+                    
                     c.state.despawn_actor(actor.handle);
                 }
             },
         }
+    }
+
+    for (actor, dmg) in hits.drain(..) {
+        let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
     }
 }
 
