@@ -13,6 +13,36 @@ new_key_type! {
 }
 
 #[derive(Default, Clone)]
+pub struct Timer {
+    pub time:f32,
+    pub end_time:f32
+}
+
+impl Timer {
+    pub fn new(end_time:f32) -> Self {
+        Self {
+            time: 0.0,
+            end_time,
+        }
+    }
+
+    pub fn tick(&mut self, dt:f32) {
+        self.time += dt;
+        if self.time > self.end_time {
+            self.time = self.end_time;
+        }
+    }
+
+    pub fn alpha(&self) -> f32 {
+        if self.end_time == 0.0 {
+            return 0.0;
+        }
+
+        self.time / self.end_time
+    }
+}
+
+#[derive(Default, Clone)]
 pub struct Cooldown {
     pub heat:f32
 }
