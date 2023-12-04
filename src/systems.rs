@@ -143,44 +143,49 @@ fn apply_vel(c: &mut Context) {
         let pos = actor.pos;
         let mut new_pos = pos + vel * dt;
 
-        let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
-        let q = spatial.query_around([pos.x, pos.y], 2.0);
-        for (handle2,_) in q {
-            let handle2 = *spatial.get(handle2).unwrap().1;
-            if handle != handle2 {
-                let actor2 = c.state.actor(handle2).unwrap();
-                let v = actor2.pos - pos;
-                let v = v.normalize_or_zero();
-                if v.dot(vel) < 0.0 { continue;};
+        if actor.info.solid {
+            let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
+            let q = spatial.query_around([pos.x, pos.y], 2.0);
+            for (handle2,_) in q {
+                let handle2 = *spatial.get(handle2).unwrap().1;
+                if handle != handle2 {
+                    let actor2 = c.state.actor(handle2).unwrap();
+                    if actor2.info.solid == false {
+                        continue;;
+                    }
+                    let v = actor2.pos - pos;
+                    let v = v.normalize_or_zero();
+                    if v.dot(vel) < 0.0 { continue;};
 
-                let shape2 =
-                    parry2d::shape::Cuboid::new([actor2.info.radius, actor2.info.radius].into());
+                    let shape2 =
+                        parry2d::shape::Cuboid::new([actor2.info.radius, actor2.info.radius].into());
 
-                
-                let contact = parry2d::query::contact(
-                    &[new_pos.x, new_pos.y].into(),
-                    &shape,
-                    &[actor2.pos.x, actor2.pos.y].into(),
-                    &shape2,
-                    2.0,
-                );
+                    
+                    let contact = parry2d::query::contact(
+                        &[new_pos.x, new_pos.y].into(),
+                        &shape,
+                        &[actor2.pos.x, actor2.pos.y].into(),
+                        &shape2,
+                        2.0,
+                    );
 
-                let Ok(contact) = contact else {
-                    continue;
-                };
-                let Some(contact) = contact else {
-                    continue;
-                };
+                    let Ok(contact) = contact else {
+                        continue;
+                    };
+                    let Some(contact) = contact else {
+                        continue;
+                    };
 
-                if contact.dist > 0.0 {
-                    continue;
-                };
+                    if contact.dist > 0.0 {
+                        continue;
+                    };
 
-                let push_back = Vec2::new(contact.normal1.x, contact.normal1.y) * contact.dist;
-                new_pos = new_pos + push_back;
-                // TODO maybe avoid generating multiple contact events
-                let ce = ContactEvent::Actor { actor: handle, other_actor: handle2 };
-                c.state.contact_events.push(ce);
+                    let push_back = Vec2::new(contact.normal1.x, contact.normal1.y) * contact.dist;
+                    new_pos = new_pos + push_back;
+                    // TODO maybe avoid generating multiple contact events
+                    let ce = ContactEvent::Actor { actor: handle, other_actor: handle2 };
+                    c.state.contact_events.push(ce);
+                }
             }
         }
 

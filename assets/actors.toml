@@ -1,6 +1,9 @@
 [decoration]
 
+[particle]
+
 [creature]
+solid = true
 speed = 3.0
 radius = 0.5
 shootable = true
@@ -22,9 +25,11 @@ frames = ["zombie"]
 health = 25
 
 [missile]
+solid = true
 radius = 0.0
 missile = true
 
 [bullet]
 extends = "missile"
 frames = ["bullet"]
+
