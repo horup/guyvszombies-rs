@@ -184,8 +184,6 @@ fn apply_vel(c: &mut Context) {
             }
         }
 
-        dbg!(c.state.contact_evets.len());
-
         let mut actor = c.state.actor_mut(handle).unwrap();
         actor.pos = new_pos;
     }
