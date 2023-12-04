@@ -1,4 +1,4 @@
-use glam::Vec2;
+use glam::{Vec2, Vec4};
 use slotmap::{new_key_type, SlotMap};
 use std::{
     borrow::{Borrow, BorrowMut},
@@ -60,7 +60,8 @@ pub struct Actor {
     pub attack_dir:Vec2,
     pub attack_cooldown:Cooldown,
     pub owner:ActorHandle,
-    pub health:f32
+    pub health:f32,
+    pub color:Vec4
 }
 
 #[derive(Clone)]
@@ -117,7 +118,8 @@ impl State {
             attack_dir: Default::default(),
             attack_cooldown: Default::default(),
             owner: Default::default(),
-            health: actor_info.health
+            health: actor_info.health,
+            color:Vec4::new(1.0, 1.0, 1.0, 1.0)
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()
