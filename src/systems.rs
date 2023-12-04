@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use crate::{Context, ContactEvent};
 use macroquad::prelude::*;
 
@@ -242,7 +244,17 @@ pub fn missile_contact(c:&mut Context) {
                         hits.push((other_actor.handle, 10.0));
                     }
                     
+                    let pos = actor.pos;
                     c.state.despawn_actor(actor.handle);
+
+                    let max = 8;
+                    for i in 0..max {
+                        let a = i as f32 / max as f32 * PI * 2.0;
+                        let v = Vec2::new(a.cos(), a.sin()) * 2.0;
+                        let mut spatter = c.state.spawn_actor("spatter");
+                        spatter.pos = pos;
+                        spatter.vel = v;
+                    }
                 }
             },
         }
@@ -251,6 +263,20 @@ pub fn missile_contact(c:&mut Context) {
     for (actor, dmg) in hits.drain(..) {
         let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
         dbg!(actor.health);
+    }
+}
+
+fn particle(c:&mut Context) {
+    let dt = get_frame_time();
+    for actor_handle in c.state.actor_handles() {
+        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; };
+        if actor.info.particle {
+            actor.health -= dt;
+            dbg!(actor.health);
+            if actor.health <= 0.0 {
+                c.state.despawn_actor(actor_handle);
+            }
+        }
     }
 }
 
@@ -264,6 +290,7 @@ pub fn tick(c: &mut Context) {
         apply_locomotion,
         apply_vel,
         missile_contact,
+        particle,
         draw,
     ];
     for system in systems.iter() {

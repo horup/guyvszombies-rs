@@ -1,6 +1,8 @@
 [decoration]
 
 [particle]
+health = 0.3
+particle = true
 
 [creature]
 solid = true
@@ -33,3 +35,7 @@ missile = true
 extends = "missile"
 frames = ["bullet"]
 
+
+[spatter]
+extends = "particle"
+frames = ["spatter"]
