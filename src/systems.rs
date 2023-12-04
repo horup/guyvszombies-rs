@@ -245,6 +245,7 @@ pub fn missile_contact(c:&mut Context) {
 
     for (actor, dmg) in hits.drain(..) {
         let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
+        dbg!(actor.health);
     }
 }
 

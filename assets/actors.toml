@@ -3,7 +3,8 @@
 [creature]
 speed = 3.0
 radius = 0.5
-alive = true
+shootable = true
+health = 10
 
 [enemy]
 extends = "creature"
@@ -13,13 +14,15 @@ bot = true
 extends = "creature"
 frames = ["guy"]
 speed = 5.0
+health = 100
 
 [zombie]
 extends = "enemy"
 frames = ["zombie"]
+health = 25
 
 [missile]
-radius = 0.2
+radius = 0.0
 missile = true
 
 [bullet]
