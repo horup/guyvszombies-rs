@@ -62,12 +62,21 @@ pub struct Actor {
     pub owner:ActorHandle
 }
 
+#[derive(Clone)]
+pub enum ContactEvent {
+    Actor {
+        actor:ActorHandle,
+        other_actor:ActorHandle
+    }
+}
+
 #[derive(Default)]
 pub struct State {
     pub spawner:Clock,
     pub me:ActorHandle,
     pub actors: SlotMap<ActorHandle, Actor>,
     pub metadata: Rc<Metadata>,
+    pub contact_evets: Vec<ContactEvent>
 }
 
 pub struct ActorBorrow<A, B> {

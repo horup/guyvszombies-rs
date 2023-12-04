@@ -1,4 +1,4 @@
-use crate::Context;
+use crate::{Context, ContactEvent};
 use macroquad::prelude::*;
 
 fn start(c: &mut Context) {
@@ -127,6 +127,7 @@ fn apply_locomotion(c: &mut Context) {
 }
 
 fn apply_vel(c: &mut Context) {
+    c.state.contact_evets.clear();
     let mut actor_handles = c.state.actor_handles();
     let mut spatial = flat_spatial::Grid::new(1);
     for handle in actor_handles.iter() {
@@ -148,7 +149,7 @@ fn apply_vel(c: &mut Context) {
             let handle2 = *spatial.get(handle2).unwrap().1;
             if handle != handle2 {
                 let actor2 = c.state.actor(handle2).unwrap();
-                let v = actor2.pos - actor.pos;
+                let v = actor2.pos - pos;
                 let v = v.normalize_or_zero();
                 if v.dot(vel) < 0.0 { continue;};
 
@@ -177,8 +178,13 @@ fn apply_vel(c: &mut Context) {
 
                 let push_back = Vec2::new(contact.normal1.x, contact.normal1.y) * contact.dist;
                 new_pos = new_pos + push_back;
+                // TODO maybe avoid generating multiple contact events
+                let ce = ContactEvent::Actor { actor: handle, other_actor: handle2 };
+                c.state.contact_evets.push(ce);
             }
         }
+
+        dbg!(c.state.contact_evets.len());
 
         let mut actor = c.state.actor_mut(handle).unwrap();
         actor.pos = new_pos;
