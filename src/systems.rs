@@ -127,7 +127,7 @@ fn apply_locomotion(c: &mut Context) {
 }
 
 fn apply_vel(c: &mut Context) {
-    c.state.contact_evets.clear();
+    c.state.contact_events.clear();
     let mut actor_handles = c.state.actor_handles();
     let mut spatial = flat_spatial::Grid::new(1);
     for handle in actor_handles.iter() {
@@ -180,7 +180,7 @@ fn apply_vel(c: &mut Context) {
                 new_pos = new_pos + push_back;
                 // TODO maybe avoid generating multiple contact events
                 let ce = ContactEvent::Actor { actor: handle, other_actor: handle2 };
-                c.state.contact_evets.push(ce);
+                c.state.contact_events.push(ce);
             }
         }
 
@@ -224,6 +224,21 @@ pub fn spawner(c:&mut Context) {
     }
 }
 
+pub fn missile_contact(c:&mut Context) {
+    let contacts = c.state.contact_events.clone();
+    for ev in contacts.iter() {
+        match ev {
+            ContactEvent::Actor { actor, other_actor } => {
+                let Some(actor) = c.state.actor(*actor) else { continue;};
+                if actor.info.missile {
+                    let Some(other_actor) = c.state.actor(*other_actor) else { continue;};
+                    c.state.despawn_actor(actor.handle);
+                }
+            },
+        }
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         spawner,
@@ -233,6 +248,7 @@ pub fn tick(c: &mut Context) {
         attack,
         apply_locomotion,
         apply_vel,
+        missile_contact,
         draw,
     ];
     for system in systems.iter() {

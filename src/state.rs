@@ -76,7 +76,7 @@ pub struct State {
     pub me:ActorHandle,
     pub actors: SlotMap<ActorHandle, Actor>,
     pub metadata: Rc<Metadata>,
-    pub contact_evets: Vec<ContactEvent>
+    pub contact_events: Vec<ContactEvent>
 }
 
 pub struct ActorBorrow<A, B> {
@@ -99,6 +99,9 @@ impl<A: BorrowMut<Actor>, B> DerefMut for ActorBorrow<A, B> {
 }
 
 impl State {
+    pub fn despawn_actor(&mut self, handle: ActorHandle) {
+        self.actors.remove(handle);
+    }
     pub fn spawn_actor(&mut self, info_name: &str) -> ActorBorrow<&mut Actor, &ActorInfo> {
         let actor_info = self
             .metadata

@@ -18,9 +18,10 @@ extends = "enemy"
 frames = ["zombie"]
 
 
-[projectile]
+[missile]
 radius = 0.2
+missile = true
 
 [bullet]
-extends = "projectile"
+extends = "missile"
 frames = ["bullet"]
