@@ -59,15 +59,15 @@ pub fn draw(c: &mut Context) {
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
 
-        let color = WHITE;
         let size = Vec2::new(1.0, 1.0);
         let x = actor.pos.x - size.x / 2.0;
         let y = actor.pos.y - size.y / 2.0;
+        let color:[f32;4] = actor.color.into();
         draw_texture_ex(
             texture,
             x,
             y,
-            color,
+            color.into(),
             DrawTextureParams {
                 dest_size: Some(size),
                 ..Default::default()
@@ -262,7 +262,6 @@ pub fn missile_contact(c:&mut Context) {
 
     for (actor, dmg) in hits.drain(..) {
         let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
-        dbg!(actor.health);
     }
 }
 
@@ -272,7 +271,8 @@ fn particle(c:&mut Context) {
         let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; };
         if actor.info.particle {
             actor.health -= dt;
-            dbg!(actor.health);
+            let a = actor.health / actor.info.health;
+            actor.color.w = a;
             if actor.health <= 0.0 {
                 c.state.despawn_actor(actor_handle);
             }
