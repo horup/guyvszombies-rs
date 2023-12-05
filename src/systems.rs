@@ -50,11 +50,21 @@ pub fn draw(c: &mut Context) {
     set_camera(&c.camera);
     let s = 32.0;
     draw_rectangle(-s / 2.0, -s / 2.0, s, s, DARKGRAY);
+    let mut sorted_actors = Vec::new();
 
     for actor in c.state.actor_handles() {
         let Some(actor) = c.state.actor(actor) else {
             continue;
         };
+        sorted_actors.push(actor);
+    }
+    sorted_actors.sort_by(|a: &crate::ActorBorrow<&crate::Actor, &crate::ActorInfo>,b|a.pos.y.partial_cmp(&b.pos.y).unwrap());
+
+
+    
+
+    for actor in sorted_actors.drain(..) {
+        
         let frame = actor.info.frames[0];
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
@@ -73,6 +83,7 @@ pub fn draw(c: &mut Context) {
             },
         );
     }
+
 }
 
 fn draw_debug(c:&mut Context) {
