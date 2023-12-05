@@ -96,7 +96,9 @@ pub struct Actor {
     pub owner:ActorHandle,
     pub health:f32,
     pub color:Vec4,
-    pub pain_timer:Timer
+    pub pain_timer:Timer,
+    pub frame:f32,
+    pub facing:f32
 }
 
 #[derive(Clone)]
@@ -155,7 +157,9 @@ impl State {
             owner: Default::default(),
             health: actor_info.health,
             color:Vec4::new(1.0, 1.0, 1.0, 1.0),
-            pain_timer:Timer::new(0.25)
+            pain_timer:Timer::new(0.25),
+            frame: 0.0,
+            facing: 0.0,
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()

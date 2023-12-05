@@ -18,6 +18,7 @@ bot = true
 [guy]
 extends = "creature"
 frames = ["guy_stand"]
+locomotion_frames = ["guy_walk1", "guy_walk2"]
 speed = 5.0
 health = 100
 
