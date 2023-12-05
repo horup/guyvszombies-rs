@@ -58,10 +58,9 @@ pub fn draw(c: &mut Context) {
         let frame = actor.info.frames[0];
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
-
-        let size = Vec2::new(1.0, 1.0);
+        let size = Vec2::new(2.0, 2.0);
         let x = actor.pos.x - size.x / 2.0;
-        let y = actor.pos.y - size.y / 2.0;
+        let y = actor.pos.y - size.y / 2.0 - 1.0;
         let color:[f32;4] = actor.color.into();
         draw_texture_ex(
             texture,
@@ -73,6 +72,16 @@ pub fn draw(c: &mut Context) {
                 ..Default::default()
             },
         );
+    }
+}
+
+fn draw_debug(c:&mut Context) {
+    for actor_handle in c.state.actor_handles() {
+        let Some(actor) = c.state.actor(actor_handle) else { continue;};
+        let r = actor.info.radius;
+        let x = actor.pos.x - r;
+        let y = actor.pos.y - r;
+        draw_rectangle_lines(x, y, r * 2.0, r * 2.0, 0.1, RED);
     }
 }
 
@@ -316,6 +325,7 @@ pub fn tick(c: &mut Context) {
         particle,
         pain_timer,
         draw,
+        draw_debug
     ];
     for system in systems.iter() {
         system(c);

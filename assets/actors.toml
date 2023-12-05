@@ -17,13 +17,13 @@ bot = true
 
 [guy]
 extends = "creature"
-frames = ["guy"]
+frames = ["guy_stand"]
 speed = 5.0
 health = 100
 
 [zombie]
 extends = "enemy"
-frames = ["zombie"]
+frames = ["zombie_stand"]
 health = 25
 
 [missile]
