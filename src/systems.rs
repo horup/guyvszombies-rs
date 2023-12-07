@@ -72,6 +72,7 @@ pub fn draw(c: &mut Context) {
         let x = actor.pos.x - size.x / 2.0;
         let y = actor.pos.y - size.y / 2.0 - 1.0;
         let color:[f32;4] = actor.color.into();
+        let flip_x = actor.facing_vector().x < 0.0;
         draw_texture_ex(
             texture,
             x,
@@ -79,6 +80,7 @@ pub fn draw(c: &mut Context) {
             color.into(),
             DrawTextureParams {
                 dest_size: Some(size),
+                flip_x,
                 ..Default::default()
             },
         );

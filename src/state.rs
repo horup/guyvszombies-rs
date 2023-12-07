@@ -101,6 +101,12 @@ pub struct Actor {
     pub facing:f32
 }
 
+impl Actor {
+    pub fn facing_vector(&self) -> Vec2 {
+        Vec2::new(self.facing.cos(), self.facing.sin())
+    }
+}
+
 #[derive(Clone)]
 pub enum ContactEvent {
     Actor {
