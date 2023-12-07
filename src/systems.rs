@@ -276,7 +276,8 @@ pub fn game_state(c:&mut Context) {
             timer.tick(dt);
             if timer.is_done() {
                 c.state.round += 1;
-                let mobs_to_spawn = 3 * c.state.round;
+                let i = c.state.round + 1;
+                let mobs_to_spawn = i * i;
                 c.state.game_state = GameState::Spawning { mobs_left_to_spawn: mobs_to_spawn, mobs_total: mobs_to_spawn };
             }
         },
