@@ -33,6 +33,10 @@ impl Timer {
         }
     }
 
+    pub fn time_left(&self) -> f32 { 
+        self.end_time - self.timer
+    }
+
     pub fn restart(&mut self, end_time:f32) {
         self.timer = 0.0;
         self.end_time = end_time;

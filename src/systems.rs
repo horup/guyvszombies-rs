@@ -87,6 +87,28 @@ pub fn draw(c: &mut Context) {
 
 }
 
+
+pub fn draw_hud(c:&mut Context) {
+    set_default_camera();
+    let x = screen_width() / 2.0;
+    let font_size = 32;
+    let y = font_size as f32;
+    let s = format!("ROUND {}", &c.state.round);
+    let m = measure_text(&s, None, font_size, 1.0);
+    draw_text(&s, x - m.width / 2.0, y, font_size as f32, WHITE);
+
+    match &c.state.game_state {
+        GameState::Countdown { timer } => {
+            let x = screen_width() / 2.0;
+            let y = screen_height() / 2.0;
+            let s = format!("Next round starting in {:.2} seconds", &timer.time_left());
+            let m = measure_text(&s, None, font_size, 1.0);
+            draw_text(&s, x - m.width / 2.0, y, font_size as f32, WHITE);
+        },
+        _ => {}
+    }
+}
+
 fn draw_debug(c:&mut Context) {
     if c.debug == false { return };
     for actor_handle in c.state.actor_handles() {
@@ -367,7 +389,8 @@ pub fn tick(c: &mut Context) {
         particle,
         pain_timer,
         draw,
-        draw_debug
+        draw_debug,
+        draw_hud
     ];
     for system in systems.iter() {
         system(c);
