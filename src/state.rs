@@ -128,6 +128,20 @@ pub struct State {
     pub mobs_total:u32
 }
 
+impl State {
+    pub fn mobs_left(&self) -> u32 {
+        let mut left = 0;
+        for actor_handle in self.actor_handles() {
+            let Some(actor) = self.actor(actor_handle) else { continue; };
+            if actor.health <= 0.0 && actor.info.bot {
+                left += 1;
+            }
+        }
+
+        left
+    }
+}
+
 pub struct ActorBorrow<A, B> {
     pub handle: ActorHandle,
     pub actor: A,
