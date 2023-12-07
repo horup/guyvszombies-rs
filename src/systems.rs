@@ -248,6 +248,27 @@ fn attack(c:&mut Context) {
 
 pub fn spawner(c:&mut Context) {
     let dt = get_frame_time();
+    //c.state.next_wave_timer.tick(dt);
+    /*if c.state.next_wave_timer.is_done() {
+        // wave in progression
+        if c.state.mobs_left() == 0 && c.state.mobs_to_spawn == 0 {
+            // no more mobs, restart next_wave timer
+            c.state.next_wave_timer.restart(5.0);
+        }
+    } else {
+       
+    }*/
+
+    if c.state.next_wave_timer.is_done() == false {
+        // waiting for next wave
+        return;
+    }
+
+    
+
+    /*if c.state.mobs_left() == 0 {
+        //
+    }*/
     if c.state.spawner.tick(dt, 1.0) {
         let r = macroquad::rand::rand() / 365;
         let r = r as f32;
@@ -292,7 +313,8 @@ pub fn missile_contact(c:&mut Context) {
     for (actor_handle, dmg) in hits.drain(..) {
         let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue;};
         actor.health -= dmg;
-        actor.pain_timer.restart();
+        let et = actor.pain_timer.end_time;
+        actor.pain_timer.restart(et);
 
         if actor.health <= 0.0 {
             c.state.despawn_actor(actor_handle);

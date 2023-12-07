@@ -26,15 +26,23 @@ impl Timer {
         }
     }
 
-    pub fn restart(&mut self) {
+    pub fn restart(&mut self, end_time:f32) {
         self.timer = 0.0;
+        self.end_time = end_time;
     }
 
-    pub fn tick(&mut self, dt:f32) {
+    pub fn tick(&mut self, dt:f32) -> bool {
         self.timer += dt;
-        if self.timer > self.end_time {
+        if self.timer >= self.end_time {
             self.timer = self.end_time;
+            return true;
         }
+
+        return false;
+    }
+
+    pub fn is_done(&self) -> bool {
+        self.timer == self.end_time
     }
 
     pub fn alpha(&self) -> f32 {
@@ -125,7 +133,8 @@ pub struct State {
     pub next_wave_timer:Timer,
     pub wave_num:u32,
     pub mobs_spawned:u32,
-    pub mobs_total:u32
+    pub mobs_total:u32,
+    pub mobs_to_spawn:u32
 }
 
 impl State {
