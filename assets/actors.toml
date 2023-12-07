@@ -26,6 +26,7 @@ health = 100
 extends = "enemy"
 frames = ["zombie_stand"]
 health = 25
+speed = 2
 
 [missile]
 solid = true

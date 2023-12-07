@@ -26,6 +26,13 @@ impl Timer {
         }
     }
 
+    pub fn start(end_time:f32) -> Self {
+        Self {
+            timer: 0.0,
+            end_time,
+        }
+    }
+
     pub fn restart(&mut self, end_time:f32) {
         self.timer = 0.0;
         self.end_time = end_time;
