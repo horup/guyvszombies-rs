@@ -7,5 +7,6 @@ use crate::{Metadata, State};
 pub struct Context {
     pub camera:Camera2D,
     pub metadata:Rc<Metadata>,
-    pub state:State
+    pub state:State,
+    pub debug:bool
 }

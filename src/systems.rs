@@ -61,8 +61,6 @@ pub fn draw(c: &mut Context) {
     sorted_actors.sort_by(|a: &crate::ActorBorrow<&crate::Actor, &crate::ActorInfo>,b|a.pos.y.partial_cmp(&b.pos.y).unwrap());
 
 
-    
-
     for actor in sorted_actors.drain(..) {
         
         let frame = actor.info.frames[0];
@@ -89,6 +87,7 @@ pub fn draw(c: &mut Context) {
 }
 
 fn draw_debug(c:&mut Context) {
+    if c.debug == false { return };
     for actor_handle in c.state.actor_handles() {
         let Some(actor) = c.state.actor(actor_handle) else { continue;};
         let r = actor.info.radius;
