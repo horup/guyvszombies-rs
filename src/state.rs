@@ -121,7 +121,11 @@ pub struct State {
     pub me:ActorHandle,
     pub actors: SlotMap<ActorHandle, Actor>,
     pub metadata: Rc<Metadata>,
-    pub contact_events: Vec<ContactEvent>
+    pub contact_events: Vec<ContactEvent>,
+    pub next_wave_timer:Timer,
+    pub wave_num:u32,
+    pub mobs_spawned:u32,
+    pub mobs_total:u32
 }
 
 pub struct ActorBorrow<A, B> {
