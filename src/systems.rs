@@ -147,6 +147,12 @@ fn apply_locomotion(c: &mut Context) {
         let delta_dir = delta_vel.normalize_or_zero();
         let add_speed = delta_len.min(max_acceleration);
         actor.vel = actor.vel + delta_dir * add_speed;
+
+        if actor.locomotion_dir.length() > 0.0 {
+            let d = actor.locomotion_dir.normalize_or_zero();
+            let a = f32::atan2(d.y, d.x);
+            actor.facing = a;
+        }
     }
 }
 
