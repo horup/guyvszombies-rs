@@ -123,6 +123,26 @@ pub enum ContactEvent {
     }
 }
 
+#[derive(Clone)]
+pub enum GameState {
+    Countdown {
+        timer:Timer
+    },
+    Spawning {
+        mobs_left_to_spawn:u32,
+        mobs_total:u32
+    },
+    WaitForDefeat
+}
+
+impl Default for GameState {
+    fn default() -> Self {
+        Self::Countdown {
+            timer:Timer::new(5.0)
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct State {
     pub spawner:Clock,
@@ -130,11 +150,8 @@ pub struct State {
     pub actors: SlotMap<ActorHandle, Actor>,
     pub metadata: Rc<Metadata>,
     pub contact_events: Vec<ContactEvent>,
-    pub next_wave_timer:Timer,
-    pub wave_num:u32,
-    pub mobs_spawned:u32,
-    pub mobs_total:u32,
-    pub mobs_to_spawn:u32
+    pub round:u32,
+    pub game_state:GameState
 }
 
 impl State {
@@ -142,7 +159,7 @@ impl State {
         let mut left = 0;
         for actor_handle in self.actor_handles() {
             let Some(actor) = self.actor(actor_handle) else { continue; };
-            if actor.health <= 0.0 && actor.info.bot {
+            if actor.health > 0.0 && actor.info.bot {
                 left += 1;
             }
         }

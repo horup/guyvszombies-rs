@@ -1,6 +1,7 @@
+use core::panic;
 use std::f32::consts::PI;
 
-use crate::{Context, ContactEvent};
+use crate::{Context, ContactEvent, GameState, Timer};
 use macroquad::prelude::*;
 
 fn start(c: &mut Context) {
@@ -246,38 +247,37 @@ fn attack(c:&mut Context) {
     }
 }
 
-pub fn spawner(c:&mut Context) {
+pub fn game_state(c:&mut Context) {
     let dt = get_frame_time();
-    //c.state.next_wave_timer.tick(dt);
-    /*if c.state.next_wave_timer.is_done() {
-        // wave in progression
-        if c.state.mobs_left() == 0 && c.state.mobs_to_spawn == 0 {
-            // no more mobs, restart next_wave timer
-            c.state.next_wave_timer.restart(5.0);
-        }
-    } else {
-       
-    }*/
-
-    if c.state.next_wave_timer.is_done() == false {
-        // waiting for next wave
-        return;
-    }
-
-    
-
-    /*if c.state.mobs_left() == 0 {
-        //
-    }*/
-    if c.state.spawner.tick(dt, 1.0) {
-        let r = macroquad::rand::rand() / 365;
-        let r = r as f32;
-        let r = r / 365.0;
-        let x = r.cos();
-        let y = r.sin();
-        let r = 8.0;
-        let v = Vec2::new(x * r, y * r);
-        c.state.spawn_actor("zombie").pos = v;
+    match &mut c.state.game_state {
+        crate::GameState::Countdown { timer } => {
+            timer.tick(dt);
+            if timer.is_done() {
+                c.state.round += 1;
+                let mobs_to_spawn = 10 * c.state.round;
+                c.state.game_state = GameState::Spawning { mobs_left_to_spawn: mobs_to_spawn, mobs_total: mobs_to_spawn };
+            }
+        },
+        crate::GameState::Spawning { mobs_left_to_spawn, mobs_total } => {
+            if *mobs_left_to_spawn > 0 {
+                *mobs_left_to_spawn -= 1;
+                let r = macroquad::rand::rand() / 365;
+                let r = r as f32;
+                let r = r / 365.0;
+                let x = r.cos();
+                let y = r.sin();
+                let r = 15.0;
+                let v = Vec2::new(x * r, y * r);
+                c.state.spawn_actor("zombie").pos = v;
+            } else {
+                c.state.game_state = GameState::WaitForDefeat;
+            }
+        },
+        crate::GameState::WaitForDefeat => {
+            if c.state.mobs_left() == 0 {
+                c.state.game_state = GameState::Countdown { timer: Timer::new(5.0) };
+            }
+        },
     }
 }
 
@@ -356,7 +356,7 @@ fn pain_timer(c:&mut Context) {
 
 pub fn tick(c: &mut Context) {
     let systems = [
-        spawner,
+        game_state,
         camera,
         input_player,
         input_bot,
