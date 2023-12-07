@@ -93,6 +93,8 @@ fn draw_debug(c:&mut Context) {
         let x = actor.pos.x - r;
         let y = actor.pos.y - r;
         draw_rectangle_lines(x, y, r * 2.0, r * 2.0, 0.1, RED);
+        let v = Vec2::new(actor.facing.cos(), actor.facing.sin());
+        draw_line(actor.pos.x, actor.pos.y, actor.pos.x + v.x, actor.pos.y + v.y, 0.1, GREEN);
     }
 }
 
