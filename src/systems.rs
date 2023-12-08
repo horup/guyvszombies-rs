@@ -151,12 +151,28 @@ fn input_player(c: &mut Context) {
         attack_dir.y = 1.0;
     }
 
+
     let d = d.normalize_or_zero();
     let Some(mut player) = c.state.actor_mut(c.state.me) else {
         return;
     };
+
+    
+    if attack_dir.length() == 0.0 {
+        // check mouse
+        let m = mouse_position();
+        let w = c.camera.screen_to_world(m.into());
+        let v = w - player.pos;
+        if is_mouse_button_down(MouseButton::Left) {
+            let v = v.normalize_or_zero();
+            attack_dir = v;
+        }
+    }
+
+
     player.attack_dir = attack_dir;
     player.locomotion_dir = d;
+    
 }
 
 fn apply_locomotion(c: &mut Context) {
