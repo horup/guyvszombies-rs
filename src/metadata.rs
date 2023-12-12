@@ -19,6 +19,7 @@ pub struct ActorInfo {
     pub name: String,
     pub frames: Vec<FrameIndex>,
     pub locomotion_frames: Vec<FrameIndex>,
+    pub dead_frames: Vec<FrameIndex>,
     pub bot: bool,
     pub speed: f32,
     pub radius:f32,
@@ -190,6 +191,16 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => base.locomotion_frames,
             };
+            let dead_frames = match get_array_string("dead_frames") {
+                Some(frames) => frames
+                    .iter()
+                    .map(|frame| FrameIndex {
+                        image: images.find(&frame).expect("frame was not found").index,
+                        frame: 0,
+                    })
+                    .collect(),
+                None => base.dead_frames,
+            };
             let actor_info = ActorInfo {
                 index: 0,
                 name: name.clone(),
@@ -203,6 +214,7 @@ impl Assets<ActorInfo> {
                 health: get_f32("health").unwrap_or(base.health),
                 solid: get_bool("solid").unwrap_or(base.solid),
                 particle:get_bool("particle").unwrap_or(base.particle),
+                dead_frames
             };
             self.push(actor_info);
         }

@@ -30,9 +30,12 @@ pub fn camera(c: &mut Context) {
 pub fn input_bot(c: &mut Context) {
     //let dt: f32 = get_frame_time();
     for actor in c.state.actor_handles() {
-        let Some(mut bot) = c.state.actor(actor) else {
+        let Some(bot) = c.state.actor(actor) else {
             continue;
         };
+        if bot.health <= 0.0 {
+            continue;
+        }
         if bot.info.bot == false {
             continue;
         }
@@ -66,6 +69,9 @@ pub fn draw(c: &mut Context) {
         let mut frames = &actor.info.frames;
         if actor.locomotion_dir.length() > 0.0 {
             frames = &actor.info.locomotion_frames;
+        }
+        if actor.health <= 0.0 {
+            frames = &actor.info.dead_frames;
         }
         if frames.len() == 0 {
             frames = &actor.info.frames;
@@ -190,6 +196,9 @@ fn apply_locomotion(c: &mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let mut actor = c.state.actor_mut(handle).unwrap();
+        if actor.health <= 0.0 {
+            actor.locomotion_dir = Vec2::default();
+        }
         let speed = actor.info.speed;
         let max_acceleration = speed * speed * dt;
         let desired_vel = actor.locomotion_dir * speed;
@@ -224,15 +233,15 @@ fn apply_vel(c: &mut Context) {
         let pos = actor.pos;
         let mut new_pos = pos + vel * dt;
 
-        if actor.info.solid {
+        if actor.info.solid || actor.health <= 0.0 {
             let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
             let q = spatial.query_around([pos.x, pos.y], 2.0);
             for (handle2,_) in q {
                 let handle2 = *spatial.get(handle2).unwrap().1;
                 if handle != handle2 {
                     let actor2 = c.state.actor(handle2).unwrap();
-                    if actor2.info.solid == false {
-                        continue;;
+                    if actor2.info.solid == false || actor2.health <= 0.0 {
+                        continue;
                     }
                     let v = actor2.pos - pos;
                     let v = v.normalize_or_zero();
@@ -366,9 +375,9 @@ pub fn missile_contact(c:&mut Context) {
         let et = actor.pain_timer.end_time;
         actor.pain_timer.restart(et);
 
-        if actor.health <= 0.0 {
+        /*if actor.health <= 0.0 {
             c.state.despawn_actor(actor_handle);
-        }
+        }*/
     }
 }
 

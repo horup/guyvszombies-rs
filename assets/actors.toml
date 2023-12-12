@@ -26,10 +26,12 @@ health = 100
 extends = "enemy"
 frames = ["zombie_stand"]
 locomotion_frames = ["zombie_walk1", "zombie_walk2"]
+dead_frames = ["zombie_dead1"]
 health = 25
 speed = 2
 
 [missile]
+health = 1
 solid = true
 radius = 0.0
 missile = true
