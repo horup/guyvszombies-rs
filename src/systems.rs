@@ -63,8 +63,16 @@ pub fn draw(c: &mut Context) {
 
 
     for actor in sorted_actors.drain(..) {
-        
-        let frame = actor.info.frames[0];
+        let mut frames = &actor.info.frames;
+        if actor.locomotion_dir.length() > 0.0 {
+            frames = &actor.info.locomotion_frames;
+        }
+        if frames.len() == 0 {
+            frames = &actor.info.frames;
+        }
+
+        let f = actor.frame as usize % frames.len();
+        let frame = frames[f];
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
         let size = Vec2::new(2.0, 2.0);
@@ -393,6 +401,14 @@ fn pain_timer(c:&mut Context) {
     }
 }
 
+fn animation(c:&mut Context) {
+    let dt = get_frame_time();
+    for actor_handle in c.state.actor_handles() {
+        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; };
+        actor.frame += 10.0 * dt;
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         game_state,
@@ -405,6 +421,7 @@ pub fn tick(c: &mut Context) {
         missile_contact,
         particle,
         pain_timer,
+        animation,
         draw,
         draw_debug,
         draw_hud
