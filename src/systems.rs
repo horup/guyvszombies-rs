@@ -33,7 +33,7 @@ pub fn input_bot(c: &mut Context) {
         let Some(bot) = c.state.actor(actor) else {
             continue;
         };
-        if bot.health <= 0.0 {
+        if !bot.is_alive() {
             continue;
         }
         if bot.info.bot == false {
@@ -196,7 +196,7 @@ fn apply_locomotion(c: &mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let mut actor = c.state.actor_mut(handle).unwrap();
-        if actor.health <= 0.0 {
+        if !actor.is_alive() {
             actor.locomotion_dir = Vec2::default();
         }
         let speed = actor.info.speed;
@@ -233,14 +233,14 @@ fn apply_vel(c: &mut Context) {
         let pos = actor.pos;
         let mut new_pos = pos + vel * dt;
 
-        if actor.info.solid && actor.health >= 0.0 {
+        if actor.is_solid() {
             let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
             let q = spatial.query_around([pos.x, pos.y], 2.0);
             for (handle2,_) in q {
                 let handle2 = *spatial.get(handle2).unwrap().1;
                 if handle != handle2 {
                     let actor2 = c.state.actor(handle2).unwrap();
-                    if actor2.info.solid == false || actor2.health <= 0.0 {
+                    if !actor2.is_solid() {
                         continue;
                     }
                     let v = actor2.pos - pos;
@@ -389,7 +389,7 @@ fn particle(c:&mut Context) {
             actor.health -= dt;
             let a = actor.health / actor.info.health;
             actor.color.w = a;
-            if actor.health <= 0.0 {
+            if !actor.is_alive() {
                 c.state.despawn_actor(actor_handle);
             }
         }

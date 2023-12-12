@@ -185,6 +185,20 @@ pub struct ActorBorrow<A, B> {
     pub info: B,
 }
 
+impl<A:Borrow<Actor>, B:Borrow<ActorInfo>> ActorBorrow<A, B> {
+    pub fn is_alive(&self) -> bool {
+        self.actor.borrow().health > 0.0
+    }
+
+    pub fn is_solid(&self) -> bool {
+        if !self.is_alive() {
+            return false;
+        }
+
+        self.info.borrow().solid
+    }
+}
+
 impl<A: Borrow<Actor>, B> Deref for ActorBorrow<A, B> {
     type Target = Actor;
     fn deref(&self) -> &Self::Target {
