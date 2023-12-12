@@ -71,6 +71,9 @@ pub fn draw(c: &mut Context) {
             frames = &actor.info.frames;
         }
 
+        if frames.len() == 0 {
+            continue;
+        }
         let f = actor.frame as usize % frames.len();
         let frame = frames[f];
         let img = c.metadata.images.get(frame.image).unwrap();

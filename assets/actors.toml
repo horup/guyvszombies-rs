@@ -25,6 +25,7 @@ health = 100
 [zombie]
 extends = "enemy"
 frames = ["zombie_stand"]
+locomotion_frames = ["zombie_walk1", "zombie_walk2"]
 health = 25
 speed = 2
 
