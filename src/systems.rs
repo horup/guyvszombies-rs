@@ -233,7 +233,7 @@ fn apply_vel(c: &mut Context) {
         let pos = actor.pos;
         let mut new_pos = pos + vel * dt;
 
-        if actor.info.solid || actor.health <= 0.0 {
+        if actor.info.solid && actor.health >= 0.0 {
             let shape = parry2d::shape::Cuboid::new([actor.info.radius, actor.info.radius].into());
             let q = spatial.query_around([pos.x, pos.y], 2.0);
             for (handle2,_) in q {
