@@ -20,6 +20,7 @@ async fn main() {
     let actors:toml::Table = actors.parse().unwrap();
     metadata.actors.read_from(actors, &metadata.images).await;
     let mut context = Context::default();
+    context.debug = true;
     context.metadata = Rc::new(metadata);
     context.state.metadata = context.metadata.clone();
     systems::once(&mut context);
