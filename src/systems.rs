@@ -113,7 +113,7 @@ pub fn draw(c: &mut Context) {
             let texture = &pistol.texture;
             let f = actor.facing_vector() * 0.5;
             let x = x + f.x;
-            let y = y + f.y;
+            let y = y + f.y + 0.25;
             draw_texture_ex(texture, x, y, WHITE, DrawTextureParams {
                 dest_size: Some(size),
                 rotation:actor.facing,
@@ -195,11 +195,13 @@ fn input_player(c: &mut Context) {
         return;
     };
 
-    if d.x < 0.0 {
+   /*  if d.x < 0.0 {
         player.facing = PI;
     } else if d.x > 0.0 {
         player.facing = 0.0;
-    }
+    }*/
+
+
 
     
     if attack_dir.length() == 0.0 {
@@ -207,6 +209,9 @@ fn input_player(c: &mut Context) {
         let m = mouse_position();
         let w = c.camera.screen_to_world(m.into());
         let v = w - player.pos;
+        let v = v.normalize_or_zero();
+        let a = f32::atan2(v.y, v.x);
+        player.facing = a;
         if is_mouse_button_down(MouseButton::Left) {
             let v = v.normalize_or_zero();
             attack_dir = v;
