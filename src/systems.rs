@@ -45,7 +45,13 @@ pub fn input_bot(c: &mut Context) {
 
         let v = player.pos - bot.pos;
         let d = v.normalize_or_zero();
+       
         let mut bot = c.state.actor_mut(actor).unwrap();
+        if d.x < 0.0 {
+            bot.facing = PI;
+        } else if d.x > 0.0 {
+            bot.facing = 0.0;
+        }
         bot.locomotion_dir = d;
     }
 }
@@ -174,6 +180,12 @@ fn input_player(c: &mut Context) {
         return;
     };
 
+    if d.x < 0.0 {
+        player.facing = PI;
+    } else if d.x > 0.0 {
+        player.facing = 0.0;
+    }
+
     
     if attack_dir.length() == 0.0 {
         // check mouse
@@ -208,11 +220,11 @@ fn apply_locomotion(c: &mut Context) {
         let add_speed = delta_len.min(max_acceleration);
         actor.vel = actor.vel + delta_dir * add_speed;
 
-        if actor.locomotion_dir.length() > 0.0 {
+        /*if actor.locomotion_dir.length() > 0.0 {
             let d = actor.locomotion_dir.normalize_or_zero();
             let a = f32::atan2(d.y, d.x);
             actor.facing = a;
-        }
+        }*/
     }
 }
 
