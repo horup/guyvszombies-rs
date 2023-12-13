@@ -106,6 +106,18 @@ pub fn draw(c: &mut Context) {
                 ..Default::default()
             },
         );
+
+        let pistol = c.metadata.images.find("pistol").unwrap();
+        let texture = &pistol.texture;
+        let f = actor.facing_vector() * 0.5;
+        let x = x + f.x;
+        let y = y + f.y;
+        draw_texture_ex(texture, x, y, WHITE, DrawTextureParams {
+            dest_size: Some(size),
+            rotation:actor.facing,
+            flip_y:if f.x < 0.0 { true } else { false },
+            ..Default::default()
+        });
     }
 
 }
