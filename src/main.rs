@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use macroquad::prelude::*;
+use macroquad::{prelude::*, miniquad::window::set_mouse_cursor};
 mod metadata;
 pub use metadata::*;
 mod context;
@@ -24,6 +24,7 @@ async fn main() {
     context.metadata = Rc::new(metadata);
     context.state.metadata = context.metadata.clone();
     systems::once(&mut context);
+    set_mouse_cursor(miniquad::CursorIcon::Crosshair);
     loop {
         systems::tick(&mut context);
         set_default_camera();
