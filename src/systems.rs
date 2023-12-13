@@ -324,8 +324,9 @@ fn attack(c:&mut Context) {
         if actor.attack_dir.length() > 0.0 {
             if actor.attack_cooldown.activate(0.2) {
                 let pos = actor.pos;
+                let pos = pos + Vec2::new(0.0, -0.25);
                 let d = actor.attack_dir;
-                let r = actor.info.radius + 0.3;
+                let r = actor.info.radius + 0.5;
                 let speed = 20.0;
                 let spawn_pos = pos + d * r;
                 let v = d * speed;
