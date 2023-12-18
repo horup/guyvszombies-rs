@@ -1,4 +1,5 @@
 use macroquad::texture::{load_texture, Texture2D};
+use toml::Value;
 use std::{collections::HashMap, default};
 pub type AssetIndex = u16;
 pub struct ImageInfo {
@@ -13,6 +14,29 @@ pub struct FrameIndex {
     pub image: AssetIndex,
     pub frame: u16,
 }
+
+#[derive(Clone, Default)] pub struct WeaponInfo {
+    pub index:AssetIndex,
+    pub rate_of_fire:f32,
+    pub name:String,
+    pub frames:Vec<FrameIndex>,
+    pub damage:[f32;2]
+}
+
+impl Asset for WeaponInfo {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn index(&self) -> u16 {
+        self.index
+    }
+
+    fn set_index(&mut self, index: u16) {
+        self.index = index;
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct ActorInfo {
     pub index: AssetIndex,
@@ -111,6 +135,52 @@ impl Assets<ImageInfo> {
     }
 }
 
+fn get_f32(prop:&str, props:&Value) -> Option<f32> {
+    let Some(v) = props.get(prop) else {
+        return None;
+    };
+    v.as_float()
+        .or(v.as_integer().map(|x| x as f64))
+        .map(|x| x as f32)
+}
+fn get_array_string(prop:&str, props:&Value) -> Option<Vec<String>> {
+    let Some(v) = props.get(prop) else {
+        return None;
+    };
+
+    let mut res = Vec::new();
+    let Some(v) = v.as_array() else {
+        return None;
+    };
+    for v in v.iter() {
+        let Some(v) = v.as_str() else {
+            return None;
+        };
+        res.push(v.to_string());
+    }
+
+    Some(res)
+}
+
+fn get_bool(prop:&str, props:&Value) -> Option<bool> {
+    let Some(v) = props.get(prop) else {
+        return None;
+    };
+    v.as_bool()
+}
+
+impl Assets<WeaponInfo> {
+    pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
+        for (name, props ) in table {
+            let mut weapon_info = WeaponInfo::default();
+            
+            weapon_info.name = name.clone();
+           // weapon_info.damage = 
+            self.push(weapon_info)
+        }
+    }
+}
+
 impl Assets<ActorInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
         for (name, props) in table {
@@ -120,49 +190,6 @@ impl Assets<ActorInfo> {
                 };
                 v.as_str()
             };
-
-            let get_f32 = |x: &str| {
-                let Some(v) = props.get(x) else {
-                    return None;
-                };
-                v.as_float()
-                    .or(v.as_integer().map(|x| x as f64))
-                    .map(|x| x as f32)
-            };
-
-            let get_i32 = |x: &str| {
-                let Some(v) = props.get(x) else {
-                    return None;
-                };
-                v.as_integer()
-            };
-
-            let get_bool = |x: &str| {
-                let Some(v) = props.get(x) else {
-                    return None;
-                };
-                v.as_bool()
-            };
-
-            let get_array_string = |x: &str| {
-                let Some(v) = props.get(x) else {
-                    return None;
-                };
-
-                let mut res = Vec::new();
-                let Some(v) = v.as_array() else {
-                    return None;
-                };
-                for v in v.iter() {
-                    let Some(v) = v.as_str() else {
-                        return None;
-                    };
-                    res.push(v.to_string());
-                }
-
-                Some(res)
-            };
-
             let extends = get_string("extends");
             let base: ActorInfo = match extends {
                 Some(extends) => self
@@ -171,7 +198,7 @@ impl Assets<ActorInfo> {
                     .clone(),
                 None => ActorInfo::default(),
             };
-            let frames = match get_array_string("frames") {
+            let frames = match get_array_string("frames", &props) {
                 Some(frames) => frames
                     .iter()
                     .map(|frame| FrameIndex {
@@ -181,7 +208,7 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => base.frames,
             };
-            let locomotion_frames = match get_array_string("locomotion_frames") {
+            let locomotion_frames = match get_array_string("locomotion_frames", &props) {
                 Some(frames) => frames
                     .iter()
                     .map(|frame| FrameIndex {
@@ -191,7 +218,7 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => base.locomotion_frames,
             };
-            let dead_frames = match get_array_string("dead_frames") {
+            let dead_frames = match get_array_string("dead_frames", &props) {
                 Some(frames) => frames
                     .iter()
                     .map(|frame| FrameIndex {
@@ -206,14 +233,14 @@ impl Assets<ActorInfo> {
                 name: name.clone(),
                 frames,
                 locomotion_frames:locomotion_frames,
-                bot: get_bool("bot").unwrap_or(base.bot),
-                speed: get_f32("speed").unwrap_or(base.speed),
-                radius: get_f32("radius").unwrap_or(base.radius),
-                missile: get_bool("missile").unwrap_or(base.missile),
-                shootable: get_bool("shootable").unwrap_or(base.shootable),
-                health: get_f32("health").unwrap_or(base.health),
-                solid: get_bool("solid").unwrap_or(base.solid),
-                particle:get_bool("particle").unwrap_or(base.particle),
+                bot: get_bool("bot", &props).unwrap_or(base.bot),
+                speed: get_f32("speed", &props).unwrap_or(base.speed),
+                radius: get_f32("radius", &props).unwrap_or(base.radius),
+                missile: get_bool("missile", &props).unwrap_or(base.missile),
+                shootable: get_bool("shootable", &props).unwrap_or(base.shootable),
+                health: get_f32("health", &props).unwrap_or(base.health),
+                solid: get_bool("solid", &props).unwrap_or(base.solid),
+                particle:get_bool("particle", &props).unwrap_or(base.particle),
                 dead_frames
             };
             self.push(actor_info);
@@ -231,4 +258,5 @@ pub trait Asset {
 pub struct Metadata {
     pub images: Assets<ImageInfo>,
     pub actors: Assets<ActorInfo>,
+    pub weapons: Assets<WeaponInfo>,
 }
