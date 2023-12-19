@@ -105,15 +105,10 @@ impl Clock {
 }
 
 #[derive(Default, Clone)]
-pub struct Weapon {
-    pub info: AssetIndex,
-    pub cooldown: f32,
-}
-
-#[derive(Default, Clone)]
 pub struct Actor {
     pub info: AssetIndex,
-    pub weapon: Weapon,
+    pub weapon: AssetIndex,
+    pub weapon_cooldown:f32,
     pub pos: Vec2,
     pub locomotion_dir: Vec2,
     pub vel: Vec2,
@@ -243,10 +238,8 @@ impl State {
             pain_timer: Timer::new(0.25),
             frame: 0.0,
             facing: 0.0,
-            weapon: Weapon {
-                info: actor_info.weapon,
-                cooldown: Default::default(),
-            },
+            weapon:weapon,
+            weapon_cooldown:0.0
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()

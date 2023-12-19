@@ -107,11 +107,10 @@ pub fn draw(c: &mut Context) {
             },
         );
 
-        let weapon_info = c.metadata.weapons.get(actor.weapon.info).unwrap();
+        let weapon_info = c.metadata.weapons.get(actor.weapon).unwrap();
         let texture = weapon_info.frames.get(0);
         if let Some(frame) = texture {
-            let texture = c.metadata.images.get(frame.image).unwrap();
-            let image = c.metadata.images.find("pistol").unwrap();
+            let image = c.metadata.images.get(frame.image).unwrap();
             let f = actor.facing_vector() * 0.5;
             let x = x + f.x;
             let y = y + f.y + 0.25;
@@ -312,14 +311,14 @@ fn attack(c:&mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
         let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
-        actor.weapon.cooldown -= dt;
-        if actor.weapon.cooldown < 0.0 {
-            actor.weapon.cooldown = 0.0;
+        actor.weapon_cooldown -= dt;
+        if actor.weapon_cooldown < 0.0 {
+            actor.weapon_cooldown = 0.0;
         }
         if actor.attack_dir.length() > 0.0 {
-            let Some(weapon_info) = c.metadata.weapons.get(actor.weapon.info) else { continue; };
-            if actor.weapon.cooldown == 0.0 {
-                actor.weapon.cooldown = 1.0 / weapon_info.rate_of_fire;
+            let Some(weapon_info) = c.metadata.weapons.get(actor.weapon) else { continue; };
+            if actor.weapon_cooldown == 0.0 {
+                actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
                 let pos = actor.pos;
                 let pos = pos + Vec2::new(0.0, -0.25);
                 let d = actor.attack_dir;
