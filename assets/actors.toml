@@ -1,3 +1,6 @@
+[default]
+weapon = "pistol"
+
 [decoration]
 
 [particle]
@@ -21,6 +24,7 @@ frames = ["guy_stand"]
 locomotion_frames = ["guy_walk1", "guy_walk2"]
 speed = 5.0
 health = 100
+weapon = "pistol"
 
 [zombie]
 extends = "enemy"
@@ -39,7 +43,6 @@ missile = true
 [bullet]
 extends = "missile"
 frames = ["bullet"]
-
 
 [spatter]
 extends = "particle"

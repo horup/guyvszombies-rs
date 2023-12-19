@@ -170,13 +170,43 @@ fn get_bool(prop:&str, props:&Value) -> Option<bool> {
     v.as_bool()
 }
 
+fn get_str<'a>(prop:&'a str, props:&'a Value) -> Option<&'a str> {
+    let Some(v) = props.get(prop) else {
+        return None;
+    };
+    v.as_str()
+}
+
 impl Assets<WeaponInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
         for (name, props ) in table {
+            let extends = get_str("extends", &props);
+            let base: WeaponInfo = match extends {
+                Some(extends) => self
+                    .find(extends)
+                    .expect("could not find base actor to extend from")
+                    .clone(),
+                None => WeaponInfo::default(),
+            };
             let mut weapon_info = WeaponInfo::default();
-            
             weapon_info.name = name.clone();
-           // weapon_info.damage = 
+            let frames = match get_array_string("frames", &props) {
+                Some(frames) => frames
+                    .iter()
+                    .map(|frame| FrameIndex {
+                        image: images.find(&frame).expect("frame was not found").index,
+                        frame: 0,
+                    })
+                    .collect(),
+                None => base.frames,
+            };
+            let  weapon_info = WeaponInfo {
+                index: 0,
+                rate_of_fire: 0.0,
+                name,
+                frames,
+                damage: [0.0,1.0],
+            };
             self.push(weapon_info)
         }
     }
@@ -185,13 +215,8 @@ impl Assets<WeaponInfo> {
 impl Assets<ActorInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>, weapons: &Assets<WeaponInfo>) {
         for (name, props) in table {
-            let get_string = |x: &str| {
-                let Some(v) = props.get(x) else {
-                    return None;
-                };
-                v.as_str()
-            };
-            let extends = get_string("extends");
+           
+            let extends = get_str("extends", &props);
             let base: ActorInfo = match extends {
                 Some(extends) => self
                     .find(extends)
@@ -229,7 +254,7 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => base.dead_frames,
             };
-            let weapon = match get_string("weapon").and_then(|x|weapons.find(x)) {
+            let weapon = match get_str("weapon", &props).and_then(|x|weapons.find(x)) {
                 Some(wp) => wp.index,
                 None => base.weapon,
             };

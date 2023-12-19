@@ -1,7 +1,7 @@
 use core::panic;
 use std::f32::consts::PI;
 
-use crate::{Context, ContactEvent, GameState, Timer};
+use crate::{Context, ContactEvent, GameState, Timer, metadata};
 use macroquad::prelude::*;
 
 fn start(c: &mut Context) {
@@ -87,7 +87,6 @@ pub fn draw(c: &mut Context) {
             continue;
         }
         let f = actor.frame as usize % frames.len();
-        let show_weapon = if actor.info.name == "guy" { true } else { false };
         let frame = frames[f];
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
@@ -108,13 +107,15 @@ pub fn draw(c: &mut Context) {
             },
         );
 
-        if show_weapon {
-            let pistol = c.metadata.images.find("pistol").unwrap();
-            let texture = &pistol.texture;
+        let weapon_info = c.metadata.weapons.get(actor.weapon.info).unwrap();
+        let texture = weapon_info.frames.get(0);
+        if let Some(frame) = texture {
+            let texture = c.metadata.images.get(frame.image).unwrap();
+            let image = c.metadata.images.find("pistol").unwrap();
             let f = actor.facing_vector() * 0.5;
             let x = x + f.x;
             let y = y + f.y + 0.25;
-            draw_texture_ex(texture, x, y, WHITE, DrawTextureParams {
+            draw_texture_ex(&image.texture, x, y, WHITE, DrawTextureParams {
                 dest_size: Some(size),
                 rotation:actor.facing,
                 flip_y:if f.x < 0.0 { true } else { false },
@@ -194,15 +195,6 @@ fn input_player(c: &mut Context) {
     let Some(mut player) = c.state.actor_mut(c.state.me) else {
         return;
     };
-
-   /*  if d.x < 0.0 {
-        player.facing = PI;
-    } else if d.x > 0.0 {
-        player.facing = 0.0;
-    }*/
-
-
-
     
     if attack_dir.length() == 0.0 {
         // check mouse
