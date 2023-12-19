@@ -312,9 +312,14 @@ fn attack(c:&mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
         let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
-        actor.attack_cooldown.tick(dt);
+        actor.weapon.cooldown -= dt;
+        if actor.weapon.cooldown < 0.0 {
+            actor.weapon.cooldown = 0.0;
+        }
         if actor.attack_dir.length() > 0.0 {
-            if actor.attack_cooldown.activate(0.2) {
+            let Some(weapon_info) = c.metadata.weapons.get(actor.weapon.info) else { continue; };
+            if actor.weapon.cooldown == 0.0 {
+                actor.weapon.cooldown = 1.0 / weapon_info.rate_of_fire;
                 let pos = actor.pos;
                 let pos = pos + Vec2::new(0.0, -0.25);
                 let d = actor.attack_dir;
