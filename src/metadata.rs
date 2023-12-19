@@ -51,7 +51,8 @@ pub struct ActorInfo {
     pub shootable:bool,
     pub health:f32,
     pub solid:bool,
-    pub particle:bool
+    pub particle:bool,
+    pub weapon:AssetIndex
 }
 
 impl Asset for ActorInfo {
@@ -182,7 +183,7 @@ impl Assets<WeaponInfo> {
 }
 
 impl Assets<ActorInfo> {
-    pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
+    pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>, weapons: &Assets<WeaponInfo>) {
         for (name, props) in table {
             let get_string = |x: &str| {
                 let Some(v) = props.get(x) else {
@@ -228,6 +229,11 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => base.dead_frames,
             };
+            let weapon = match get_string("weapon").and_then(|x|weapons.find(x)) {
+                Some(wp) => wp.index,
+                None => base.weapon,
+            };
+            
             let actor_info = ActorInfo {
                 index: 0,
                 name: name.clone(),
@@ -241,6 +247,7 @@ impl Assets<ActorInfo> {
                 health: get_f32("health", &props).unwrap_or(base.health),
                 solid: get_bool("solid", &props).unwrap_or(base.solid),
                 particle:get_bool("particle", &props).unwrap_or(base.particle),
+                weapon,
                 dead_frames
             };
             self.push(actor_info);

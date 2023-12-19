@@ -1,3 +1,8 @@
+[fists]
+name = "Fists"
+rate_of_fire = 1
+damage = [3,6]
+
 [pistol]
 name = "Pistol"
 images = ["pistol"]

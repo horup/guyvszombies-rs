@@ -16,13 +16,14 @@ async fn main() {
     let mut metadata = Metadata::default();
     metadata.images.read_from(images).await;
 
-    let actors = String::from_utf8(load_file("assets/actors.toml").await.unwrap()).unwrap();
-    let actors:toml::Table = actors.parse().unwrap();
-    metadata.actors.read_from(actors, &metadata.images).await;
-
     let weapons = String::from_utf8(load_file("assets/weapons.toml").await.unwrap()).unwrap();
     let weapons:toml::Table = weapons.parse().unwrap();
     metadata.weapons.read_from(weapons, &metadata.images).await;
+
+    let actors = String::from_utf8(load_file("assets/actors.toml").await.unwrap()).unwrap();
+    let actors:toml::Table = actors.parse().unwrap();
+    metadata.actors.read_from(actors, &metadata.images, &metadata.weapons).await;
+
 
 
     let mut context = Context::default();

@@ -14,35 +14,35 @@ new_key_type! {
 
 #[derive(Default, Clone)]
 pub struct Timer {
-    pub timer:f32,
-    pub end_time:f32
+    pub timer: f32,
+    pub end_time: f32,
 }
 
 impl Timer {
-    pub fn new(end_time:f32) -> Self {
+    pub fn new(end_time: f32) -> Self {
         Self {
             timer: end_time,
             end_time,
         }
     }
 
-    pub fn start(end_time:f32) -> Self {
+    pub fn start(end_time: f32) -> Self {
         Self {
             timer: 0.0,
             end_time,
         }
     }
 
-    pub fn time_left(&self) -> f32 { 
+    pub fn time_left(&self) -> f32 {
         self.end_time - self.timer
     }
 
-    pub fn restart(&mut self, end_time:f32) {
+    pub fn restart(&mut self, end_time: f32) {
         self.timer = 0.0;
         self.end_time = end_time;
     }
 
-    pub fn tick(&mut self, dt:f32) -> bool {
+    pub fn tick(&mut self, dt: f32) -> bool {
         self.timer += dt;
         if self.timer >= self.end_time {
             self.timer = self.end_time;
@@ -67,21 +67,21 @@ impl Timer {
 
 #[derive(Default, Clone)]
 pub struct Cooldown {
-    pub heat:f32
+    pub heat: f32,
 }
 
 impl Cooldown {
-    pub fn tick(&mut self, dt:f32) {
+    pub fn tick(&mut self, dt: f32) {
         self.heat -= dt;
         if self.heat < 0.0 {
             self.heat = 0.0;
         }
     }
 
-    pub fn activate(&mut self, heat:f32) -> bool {
+    pub fn activate(&mut self, heat: f32) -> bool {
         if self.heat == 0.0 {
             self.heat = heat;
-            return  true;
+            return true;
         }
 
         return false;
@@ -90,10 +90,10 @@ impl Cooldown {
 
 #[derive(Default, Clone)]
 pub struct Clock {
-    pub tick:f32,
+    pub tick: f32,
 }
 impl Clock {
-    pub fn tick(&mut self, dt:f32, reset_at:f32) -> bool {
+    pub fn tick(&mut self, dt: f32, reset_at: f32) -> bool {
         self.tick += dt;
         if self.tick > reset_at {
             self.tick = 0.0;
@@ -105,25 +105,26 @@ impl Clock {
 }
 
 #[derive(Default, Clone)]
-pub struct Weapon{
-    pub info:AssetIndex,
-    pub cooldown:Cooldown
+pub struct Weapon {
+    pub info: AssetIndex,
+    pub cooldown: Cooldown,
 }
 
 #[derive(Default, Clone)]
 pub struct Actor {
     pub info: AssetIndex,
+    pub weapon: Weapon,
     pub pos: Vec2,
     pub locomotion_dir: Vec2,
     pub vel: Vec2,
-    pub attack_dir:Vec2,
-    pub attack_cooldown:Cooldown,
-    pub owner:ActorHandle,
-    pub health:f32,
-    pub color:Vec4,
-    pub pain_timer:Timer,
-    pub frame:f32,
-    pub facing:f32
+    pub attack_dir: Vec2,
+    pub attack_cooldown: Cooldown,
+    pub owner: ActorHandle,
+    pub health: f32,
+    pub color: Vec4,
+    pub pain_timer: Timer,
+    pub frame: f32,
+    pub facing: f32,
 }
 
 impl Actor {
@@ -135,47 +136,49 @@ impl Actor {
 #[derive(Clone)]
 pub enum ContactEvent {
     Actor {
-        actor:ActorHandle,
-        other_actor:ActorHandle
-    }
+        actor: ActorHandle,
+        other_actor: ActorHandle,
+    },
 }
 
 #[derive(Clone)]
 pub enum GameState {
     Countdown {
-        timer:Timer
+        timer: Timer,
     },
     Spawning {
-        mobs_left_to_spawn:u32,
-        mobs_total:u32
+        mobs_left_to_spawn: u32,
+        mobs_total: u32,
     },
-    WaitForDefeat
+    WaitForDefeat,
 }
 
 impl Default for GameState {
     fn default() -> Self {
         Self::Countdown {
-            timer:Timer::new(5.0)
+            timer: Timer::new(5.0),
         }
     }
 }
 
 #[derive(Default)]
 pub struct State {
-    pub spawner:Clock,
-    pub me:ActorHandle,
+    pub spawner: Clock,
+    pub me: ActorHandle,
     pub actors: SlotMap<ActorHandle, Actor>,
     pub metadata: Rc<Metadata>,
     pub contact_events: Vec<ContactEvent>,
-    pub round:u32,
-    pub game_state:GameState
+    pub round: u32,
+    pub game_state: GameState,
 }
 
 impl State {
     pub fn mobs_left(&self) -> u32 {
         let mut left = 0;
         for actor_handle in self.actor_handles() {
-            let Some(actor) = self.actor(actor_handle) else { continue; };
+            let Some(actor) = self.actor(actor_handle) else {
+                continue;
+            };
             if actor.health > 0.0 && actor.info.bot {
                 left += 1;
             }
@@ -191,7 +194,7 @@ pub struct ActorBorrow<A, B> {
     pub info: B,
 }
 
-impl<A:Borrow<Actor>, B:Borrow<ActorInfo>> ActorBorrow<A, B> {
+impl<A: Borrow<Actor>, B: Borrow<ActorInfo>> ActorBorrow<A, B> {
     pub fn is_alive(&self) -> bool {
         self.actor.borrow().health > 0.0
     }
@@ -228,6 +231,7 @@ impl State {
             .actors
             .find(info_name)
             .expect("could not find actor info");
+        let weapon = actor_info.weapon;
         let actor = Actor {
             info: actor_info.index,
             pos: [0.0, 0.0].into(),
@@ -237,10 +241,14 @@ impl State {
             attack_cooldown: Default::default(),
             owner: Default::default(),
             health: actor_info.health,
-            color:Vec4::new(1.0, 1.0, 1.0, 1.0),
-            pain_timer:Timer::new(0.25),
+            color: Vec4::new(1.0, 1.0, 1.0, 1.0),
+            pain_timer: Timer::new(0.25),
             frame: 0.0,
             facing: 0.0,
+            weapon: Weapon {
+                info: actor_info.weapon,
+                cooldown: Cooldown::default(),
+            },
         };
         let handle = self.actors.insert(actor);
         self.actor_mut(handle).unwrap()
