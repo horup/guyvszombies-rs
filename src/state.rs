@@ -105,6 +105,12 @@ impl Clock {
 }
 
 #[derive(Default, Clone)]
+pub struct Weapon{
+    pub info:AssetIndex,
+    pub cooldown:Cooldown
+}
+
+#[derive(Default, Clone)]
 pub struct Actor {
     pub info: AssetIndex,
     pub pos: Vec2,
