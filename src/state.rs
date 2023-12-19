@@ -107,7 +107,7 @@ impl Clock {
 #[derive(Default, Clone)]
 pub struct Weapon {
     pub info: AssetIndex,
-    pub cooldown: Cooldown,
+    pub cooldown: f32,
 }
 
 #[derive(Default, Clone)]
@@ -247,7 +247,7 @@ impl State {
             facing: 0.0,
             weapon: Weapon {
                 info: actor_info.weapon,
-                cooldown: Cooldown::default(),
+                cooldown: Default::default(),
             },
         };
         let handle = self.actors.insert(actor);
