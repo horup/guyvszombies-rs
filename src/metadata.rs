@@ -177,6 +177,20 @@ fn get_str<'a>(prop:&'a str, props:&'a Value) -> Option<&'a str> {
     v.as_str()
 }
 
+fn get_array_f32<'a>(prop:&'a str, props:&'a Value) -> Option<Vec<f32>> {
+    let Some(v) = props.get(prop) else { return None};
+    let Some(v) = v.as_array() else { return None; };
+    let mut vec = Vec::new();
+    for v in v.iter() {
+        match v {
+            Value::Integer(i) => {vec.push(*i as f32)},
+            Value::Float(f) => {vec.push(*f as f32)},
+            _=> {}
+        }
+    }
+    return Some(vec);
+}
+
 impl Assets<WeaponInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
         for (name, props ) in table {
@@ -184,7 +198,7 @@ impl Assets<WeaponInfo> {
             let base: WeaponInfo = match extends {
                 Some(extends) => self
                     .find(extends)
-                    .expect("could not find base actor to extend from")
+                    .expect("could not find base weapon to extend from")
                     .clone(),
                 None => WeaponInfo::default(),
             };
@@ -200,12 +214,18 @@ impl Assets<WeaponInfo> {
                     .collect(),
                 None => base.frames,
             };
+            let rate_of_fire = get_f32("rate_of_fire", &props).unwrap_or(base.rate_of_fire);
+            let damage = match get_array_f32("damage", &props) {
+                Some(damage) => [damage.get(0).copied().unwrap_or_default(), damage.get(1).copied().unwrap_or_default()],
+                None => base.damage,
+            };
+            
             let  weapon_info = WeaponInfo {
                 index: 0,
-                rate_of_fire: 0.0,
+                rate_of_fire,
                 name,
                 frames,
-                damage: [0.0,1.0],
+                damage,
             };
             self.push(weapon_info)
         }
