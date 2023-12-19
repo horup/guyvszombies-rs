@@ -8,4 +8,6 @@ display_name = "Pistol"
 frames = ["pistol", "pistol_firing"]
 rate_of_fire = 3
 damage = [5,10]
+grip = [0.33,0.62]
+muzzle = [0.75, 0.75]
 
