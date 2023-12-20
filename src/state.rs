@@ -6,7 +6,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::{ActorInfo, AssetIndex, Metadata};
+use crate::{ActorInfo, AssetIndex, Metadata, WeaponInfo};
 
 new_key_type! {
     pub struct ActorHandle;
@@ -199,6 +199,18 @@ impl<A: Borrow<Actor>, B: Borrow<ActorInfo>> ActorBorrow<A, B> {
         }
 
         self.info.borrow().solid
+    }
+
+    pub fn hand_pos(&self) -> Vec2 {
+        let pos = self.pos;
+        let v = self.facing_vector();
+        pos + v * self.info.borrow().radius
+    }
+
+    pub fn muzzle_pos(&self, weapon_info:&WeaponInfo) -> Vec2 {
+        let hand = self.hand_pos();
+        let v = self.facing_vector();
+        hand + v * weapon_info.muzzle_offset
     }
 }
 

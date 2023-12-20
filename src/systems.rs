@@ -112,7 +112,7 @@ pub fn draw(c: &mut Context) {
         if let Some(frame) = texture {
             let image = c.metadata.images.get(frame.image).unwrap();
             let v = actor.facing_vector();
-            let hand = actor.pos + v * actor.info.radius;
+            let hand = actor.hand_pos();
             let mount: Vec2 =  hand - size / 2.0 + v * weapon_info.mount_offset * size.length();
             
             draw_texture_ex(&image.texture, mount.x, mount.y, WHITE, DrawTextureParams {
@@ -122,25 +122,11 @@ pub fn draw(c: &mut Context) {
                 ..Default::default()
             });
 
-            let muzzle = hand + v * weapon_info.muzzle_offset;
-
-
-            draw_circle(hand.x, hand.y, 0.1, GREEN);
-            draw_circle(muzzle.x, muzzle.y, 0.1, RED);
-            //draw_circle(muzzle.x, muzzle.y, 0.1, RED);
-
-
-          /*  let mount = weapon_info.mount;
-            dbg!(mount);
-            let f = actor.facing_vector() * mount * actor.info.radius;
-            let x = x + f.x;
-            let y: f32 = y + f.y;
-            draw_texture_ex(&image.texture, x, y, WHITE, DrawTextureParams {
-                dest_size: Some(size),
-                rotation:actor.facing,
-                flip_y:if f.x < 0.0 { true } else { false },
-                ..Default::default()
-            });*/
+            if c.debug {
+                let muzzle = actor.muzzle_pos(weapon_info);
+                draw_circle(hand.x, hand.y, 0.1, GREEN);
+                draw_circle(muzzle.x, muzzle.y, 0.1, RED);
+            }
         }
     }
 
@@ -183,6 +169,9 @@ fn draw_debug(c:&mut Context) {
 
 fn input_player(c: &mut Context) {
     let mut d = Vec2::new(0.0, 0.0);
+    if is_key_pressed(KeyCode::F1) {
+        c.debug = !c.debug;
+    }
     if is_key_down(KeyCode::A) {
         d.x = -1.0;
     }
@@ -340,13 +329,9 @@ fn attack(c:&mut Context) {
             let Some(weapon_info) = c.metadata.weapons.get(actor.weapon) else { continue; };
             if actor.weapon_cooldown == 0.0 {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
-                let pos = actor.pos;
-                let pos = pos + Vec2::new(0.0, -0.25);
-                let d = actor.attack_dir;
-                let r = actor.info.radius + 0.5;
                 let speed = 20.0;
-                let spawn_pos = pos + d * r;
-                let v = d * speed;
+                let spawn_pos = actor.muzzle_pos(weapon_info);
+                let v = actor.facing_vector() * speed;
                 let mut bullet = c.state.spawn_actor("bullet");
                 bullet.pos = spawn_pos;
                 bullet.vel = v;
