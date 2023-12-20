@@ -91,7 +91,7 @@ pub fn draw(c: &mut Context) {
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
         let size = Vec2::new(2.0, 2.0);
-        let x = actor.pos.x - size.x / 2.0;
+        let x: f32 = actor.pos.x - size.x / 2.0;
         let y = actor.pos.y - size.y / 2.0 - 0.25;
         let color:[f32;4] = actor.color.into();
         let flip_x = actor.facing_vector().x < 0.0;
@@ -111,15 +111,35 @@ pub fn draw(c: &mut Context) {
         let texture = weapon_info.frames.get(0);
         if let Some(frame) = texture {
             let image = c.metadata.images.get(frame.image).unwrap();
-            let f = actor.facing_vector() * 0.5;
+            let v = actor.facing_vector();
+            let hand = actor.pos + v * actor.info.radius;
+            let hand = hand;
+            let p = hand - size / 2.0;
+            let mount = weapon_info.mount;
+            let n = Vec2::new(v.y, v.x);
+            let p = p + v;// * mount + n * mount;// + v * size / 2.0;
+            draw_texture_ex(&image.texture, p.x, p.y, WHITE, DrawTextureParams {
+                dest_size: Some(size),
+                rotation:actor.facing,
+                flip_y:if v.x < 0.0 { true } else { false },
+                ..Default::default()
+            });
+
+
+            draw_circle(hand.x, hand.y, 0.1, RED);
+
+
+          /*  let mount = weapon_info.mount;
+            dbg!(mount);
+            let f = actor.facing_vector() * mount * actor.info.radius;
             let x = x + f.x;
-            let y = y + f.y + 0.25;
+            let y: f32 = y + f.y;
             draw_texture_ex(&image.texture, x, y, WHITE, DrawTextureParams {
                 dest_size: Some(size),
                 rotation:actor.facing,
                 flip_y:if f.x < 0.0 { true } else { false },
                 ..Default::default()
-            });
+            });*/
         }
     }
 

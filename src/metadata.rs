@@ -1,3 +1,4 @@
+use glam::Vec2;
 use macroquad::texture::{load_texture, Texture2D};
 use toml::Value;
 use std::{collections::HashMap, default};
@@ -20,7 +21,9 @@ pub struct FrameIndex {
     pub rate_of_fire:f32,
     pub name:String,
     pub frames:Vec<FrameIndex>,
-    pub damage:[f32;2]
+    pub damage:[f32;2],
+    pub mount:Vec2,
+    pub muzzle:Vec2
 }
 
 impl Asset for WeaponInfo {
@@ -191,6 +194,15 @@ fn get_array_f32<'a>(prop:&'a str, props:&'a Value) -> Option<Vec<f32>> {
     return Some(vec);
 }
 
+fn get_vec2<'a>(prop:&'a str, props:&'a Value) -> Option<Vec2> {
+    let Some(v) = get_array_f32(prop, props) else { return None; };
+    if v.len() == 2 {
+        return Some(Vec2::new(v[0], v[1]));
+    }
+
+    return None;
+}
+
 impl Assets<WeaponInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
         for (name, props ) in table {
@@ -219,13 +231,16 @@ impl Assets<WeaponInfo> {
                 Some(damage) => [damage.get(0).copied().unwrap_or_default(), damage.get(1).copied().unwrap_or_default()],
                 None => base.damage,
             };
-            
+            let mount = get_vec2("mount", &props).unwrap_or(base.mount);
+            let muzzle = get_vec2("muzzle", &props).unwrap_or(base.muzzle);
             let  weapon_info = WeaponInfo {
                 index: 0,
                 rate_of_fire,
                 name,
                 frames,
                 damage,
+                mount,
+                muzzle
             };
             self.push(weapon_info)
         }
