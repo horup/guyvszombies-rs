@@ -113,20 +113,21 @@ pub fn draw(c: &mut Context) {
             let image = c.metadata.images.get(frame.image).unwrap();
             let v = actor.facing_vector();
             let hand = actor.pos + v * actor.info.radius;
-            let hand = hand;
-            let p = hand - size / 2.0;
-            let mount = weapon_info.mount;
-            let n = Vec2::new(v.y, v.x);
-            let p = p + v;// * mount + n * mount;// + v * size / 2.0;
-            draw_texture_ex(&image.texture, p.x, p.y, WHITE, DrawTextureParams {
+            let mount: Vec2 =  hand - size / 2.0 + v * weapon_info.mount_offset * size.length();
+            
+            draw_texture_ex(&image.texture, mount.x, mount.y, WHITE, DrawTextureParams {
                 dest_size: Some(size),
                 rotation:actor.facing,
                 flip_y:if v.x < 0.0 { true } else { false },
                 ..Default::default()
             });
 
+            let muzzle = hand + v * weapon_info.muzzle_offset;
 
-            draw_circle(hand.x, hand.y, 0.1, RED);
+
+            draw_circle(hand.x, hand.y, 0.1, GREEN);
+            draw_circle(muzzle.x, muzzle.y, 0.1, RED);
+            //draw_circle(muzzle.x, muzzle.y, 0.1, RED);
 
 
           /*  let mount = weapon_info.mount;

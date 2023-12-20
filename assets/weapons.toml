@@ -9,6 +9,6 @@ frames = ["pistol", "pistol_firing"]
 rate_of_fire = 3
 damage = [5,10]
 #mount = [0.33,0.62]
-mount =  [1.0, 0.0]
-muzzle = [0.75, 0.75]
+mount_offset = 0.15
+muzzle_offset = 1.0
 

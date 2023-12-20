@@ -22,8 +22,8 @@ pub struct FrameIndex {
     pub name:String,
     pub frames:Vec<FrameIndex>,
     pub damage:[f32;2],
-    pub mount:Vec2,
-    pub muzzle:Vec2
+    pub mount_offset:f32,
+    pub muzzle_offset:f32
 }
 
 impl Asset for WeaponInfo {
@@ -231,16 +231,16 @@ impl Assets<WeaponInfo> {
                 Some(damage) => [damage.get(0).copied().unwrap_or_default(), damage.get(1).copied().unwrap_or_default()],
                 None => base.damage,
             };
-            let mount = get_vec2("mount", &props).unwrap_or(base.mount);
-            let muzzle = get_vec2("muzzle", &props).unwrap_or(base.muzzle);
+            let mount = get_f32("mount_offset", &props).unwrap_or(base.mount_offset);
+            let muzzle = get_f32("muzzle_offset", &props).unwrap_or(base.muzzle_offset);
             let  weapon_info = WeaponInfo {
                 index: 0,
                 rate_of_fire,
                 name,
                 frames,
                 damage,
-                mount,
-                muzzle
+                mount_offset: mount,
+                muzzle_offset: muzzle
             };
             self.push(weapon_info)
         }
