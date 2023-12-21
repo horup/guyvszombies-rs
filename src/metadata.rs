@@ -55,7 +55,12 @@ pub struct ActorInfo {
     pub health:f32,
     pub solid:bool,
     pub particle:bool,
-    pub weapon:AssetIndex
+    /// current active weapon
+    pub weapon:AssetIndex,
+    /// frame offset from center of actor
+    pub offset:Vec2,
+    /// rotate the frame such that it faces facing
+    pub rotate_to_face:bool
 }
 
 impl Asset for ActorInfo {
@@ -308,7 +313,9 @@ impl Assets<ActorInfo> {
                 solid: get_bool("solid", &props).unwrap_or(base.solid),
                 particle:get_bool("particle", &props).unwrap_or(base.particle),
                 weapon,
-                dead_frames
+                dead_frames,
+                offset: get_vec2("offset", &props).unwrap_or(base.offset),
+                rotate_to_face:get_bool("rotate_to_face", &props).unwrap_or(base.rotate_to_face)
             };
             self.push(actor_info);
         }

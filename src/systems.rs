@@ -91,10 +91,17 @@ pub fn draw(c: &mut Context) {
         let img = c.metadata.images.get(frame.image).unwrap();
         let texture = &img.texture;
         let size = Vec2::new(2.0, 2.0);
-        let x: f32 = actor.pos.x - size.x / 2.0;
-        let y = actor.pos.y - size.y / 2.0 - 0.25;
+        let x: f32 = actor.pos.x - size.x / 2.0 + actor.info.offset.x;
+        let y = actor.pos.y - size.y / 2.0 + actor.info.offset.y;
         let color:[f32;4] = actor.color.into();
-        let flip_x = actor.facing_vector().x < 0.0;
+        let flip_x = match actor.info.rotate_to_face {
+            true => false,
+            false => actor.facing_vector().x < 0.0,
+        };
+        let rotation = match actor.info.rotate_to_face {
+            true => actor.facing,
+            false => 0.0,
+        };
         draw_texture_ex(
             texture,
             x,
@@ -103,6 +110,7 @@ pub fn draw(c: &mut Context) {
             DrawTextureParams {
                 dest_size: Some(size),
                 flip_x,
+                rotation,
                 ..Default::default()
             },
         );
@@ -163,7 +171,7 @@ fn draw_debug(c:&mut Context) {
         let y = actor.pos.y - r;
         draw_rectangle_lines(x, y, r * 2.0, r * 2.0, 0.1, RED);
         let v = Vec2::new(actor.facing.cos(), actor.facing.sin());
-        draw_line(actor.pos.x, actor.pos.y, actor.pos.x + v.x, actor.pos.y + v.y, 0.1, GREEN);
+        draw_line(actor.pos.x, actor.pos.y, actor.pos.x + v.x, actor.pos.y + v.y, 0.05, GREEN);
     }
 }
 
@@ -329,12 +337,14 @@ fn attack(c:&mut Context) {
             let Some(weapon_info) = c.metadata.weapons.get(actor.weapon) else { continue; };
             if actor.weapon_cooldown == 0.0 {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
-                let speed = 20.0;
+                let speed = 15.0;
                 let spawn_pos = actor.muzzle_pos(weapon_info);
                 let v = actor.facing_vector() * speed;
+                let facing = actor.facing;
                 let mut bullet = c.state.spawn_actor("bullet");
                 bullet.pos = spawn_pos;
                 bullet.vel = v;
+                bullet.facing = facing;
             }
         }
     }
