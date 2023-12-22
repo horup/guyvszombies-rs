@@ -350,6 +350,11 @@ fn attack(c:&mut Context) {
     }
 }
 
+fn rand_f32() -> f32 {
+    let v = macroquad::rand::rand() as f32;
+    return v / u32::MAX as f32;
+}
+
 pub fn game_state(c:&mut Context) {
     let dt = get_frame_time();
     match &mut c.state.game_state {
@@ -395,7 +400,11 @@ pub fn missile_contact(c:&mut Context) {
                 if actor.info.missile {
                     let Some(other_actor) = c.state.actor(*other_actor) else { continue;};
                     if other_actor.info.shootable {
-                        hits.push((other_actor.handle, 10.0));
+                        let min_dmg: f32 = actor.info.missile_direct_damage.0;
+                        let max_dmg: f32 = actor.info.missile_direct_damage.1;
+                        let dmg = min_dmg + (max_dmg - min_dmg) * rand_f32();
+                        let dmg = dmg.floor();
+                        hits.push((other_actor.handle, dmg));
                     }
                     
                     let pos = actor.pos;
