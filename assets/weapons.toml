@@ -12,3 +12,8 @@ damage = [5,10]
 mount_offset = 0.15
 muzzle_offset = 1.0
 
+
+[rifle]
+extends = "pistol"
+rate_of_fire = 2
+damage = [100,200]
