@@ -60,7 +60,9 @@ pub struct ActorInfo {
     /// frame offset from center of actor
     pub offset:Vec2,
     /// rotate the frame such that it faces facing
-    pub rotate_to_face:bool
+    pub rotate_to_face:bool,
+    pub missile_direct_damage:(f32, f32),
+    pub missile_splash_damage:(f32, f32)
 }
 
 impl Asset for ActorInfo {
@@ -208,6 +210,15 @@ fn get_vec2<'a>(prop:&'a str, props:&'a Value) -> Option<Vec2> {
     return None;
 }
 
+fn get_tuple_f32<'a>(prop:&'a str, props:&'a Value) -> Option<(f32, f32)> {
+    let Some(v) = get_array_f32(prop, props) else { return None; };
+    if v.len() == 2 {
+        return Some((v[0], v[1]));
+    }
+
+    return None;
+}
+
 impl Assets<WeaponInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
         for (name, props ) in table {
@@ -315,7 +326,9 @@ impl Assets<ActorInfo> {
                 weapon,
                 dead_frames,
                 offset: get_vec2("offset", &props).unwrap_or(base.offset),
-                rotate_to_face:get_bool("rotate_to_face", &props).unwrap_or(base.rotate_to_face)
+                rotate_to_face:get_bool("rotate_to_face", &props).unwrap_or(base.rotate_to_face),
+                missile_direct_damage: get_tuple_f32("missile_direct_damage", &props).unwrap_or(base.missile_direct_damage),
+                missile_splash_damage: get_tuple_f32("missile_splash_damage", &props).unwrap_or(base.missile_splash_damage)
             };
             self.push(actor_info);
         }

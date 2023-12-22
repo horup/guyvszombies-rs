@@ -41,6 +41,7 @@ solid = true
 radius = 0.0
 missile = true
 rotate_to_face = true
+missile_direct_damage = [10,10]
 
 [bullet]
 extends = "missile"
