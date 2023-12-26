@@ -17,3 +17,9 @@ muzzle_offset = 1.0
 extends = "pistol"
 rate_of_fire = 2
 damage = [100,200]
+
+[machinegun]
+frames = ["machinegun", "machinegun_firing"]
+extends = "pistol"
+rate_of_fire = 10
+damage = [2,5]
