@@ -368,12 +368,15 @@ fn attack(c:&mut Context) {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
                 let speed = 15.0;
                 let spawn_pos = actor.muzzle_pos(weapon_info);
-                let v = actor.facing_vector() * speed;
-                let facing = actor.facing;
+                let spread = rand_f32() * weapon_info.spread;
+                let spread = spread - spread / 2.0;
+                let facing_with_spread = actor.facing + spread;
+                let d = Vec2::new(facing_with_spread.cos(), facing_with_spread.sin());
+                let v = d * speed;
                 let mut bullet = c.state.spawn_actor("bullet");
                 bullet.pos = spawn_pos;
                 bullet.vel = v;
-                bullet.facing = facing;
+                bullet.facing = facing_with_spread;
             }
         }
     }

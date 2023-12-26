@@ -26,6 +26,7 @@ pub struct WeaponInfo {
     pub damage: [f32; 2],
     pub mount_offset: f32,
     pub muzzle_offset: f32,
+    pub spread:f32
 }
 
 impl Asset for WeaponInfo {
@@ -262,6 +263,7 @@ impl Assets<WeaponInfo> {
             };
             let mount = get_f32("mount_offset", &props).unwrap_or(base.mount_offset);
             let muzzle = get_f32("muzzle_offset", &props).unwrap_or(base.muzzle_offset);
+            let spread = get_f32("spread", &props).unwrap_or(base.spread);
             let weapon_info = WeaponInfo {
                 index: 0,
                 rate_of_fire,
@@ -270,6 +272,7 @@ impl Assets<WeaponInfo> {
                 damage,
                 mount_offset: mount,
                 muzzle_offset: muzzle,
+                spread
             };
             self.push(weapon_info)
         }
