@@ -1,5 +1,6 @@
 use glam::Vec2;
 use macroquad::texture::{load_texture, Texture2D};
+use serde::Deserialize;
 use toml::Value;
 use std::{collections::HashMap, default};
 pub type AssetIndex = u16;

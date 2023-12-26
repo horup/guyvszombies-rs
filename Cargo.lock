@@ -169,6 +169,7 @@ dependencies = [
  "glam",
  "macroquad",
  "parry2d",
+ "serde",
  "slotmap",
  "toml",
 ]
