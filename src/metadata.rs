@@ -1,8 +1,8 @@
 use glam::Vec2;
 use macroquad::texture::{load_texture, Texture2D};
 use serde::Deserialize;
-use toml::Value;
 use std::{collections::HashMap, default};
+use toml::Value;
 pub type AssetIndex = u16;
 pub struct ImageInfo {
     pub index: AssetIndex,
@@ -17,14 +17,15 @@ pub struct FrameIndex {
     pub frame: u16,
 }
 
-#[derive(Clone, Default)] pub struct WeaponInfo {
-    pub index:AssetIndex,
-    pub rate_of_fire:f32,
-    pub name:String,
-    pub frames:Vec<FrameIndex>,
-    pub damage:[f32;2],
-    pub mount_offset:f32,
-    pub muzzle_offset:f32
+#[derive(Clone, Default)]
+pub struct WeaponInfo {
+    pub index: AssetIndex,
+    pub rate_of_fire: f32,
+    pub name: String,
+    pub frames: Vec<FrameIndex>,
+    pub damage: [f32; 2],
+    pub mount_offset: f32,
+    pub muzzle_offset: f32,
 }
 
 impl Asset for WeaponInfo {
@@ -50,20 +51,20 @@ pub struct ActorInfo {
     pub dead_frames: Vec<FrameIndex>,
     pub bot: bool,
     pub speed: f32,
-    pub radius:f32,
-    pub missile:bool,
-    pub shootable:bool,
-    pub health:f32,
-    pub solid:bool,
-    pub particle:bool,
+    pub radius: f32,
+    pub missile: bool,
+    pub shootable: bool,
+    pub health: f32,
+    pub solid: bool,
+    pub particle: bool,
     /// current active weapon
-    pub weapon:AssetIndex,
+    pub weapon: AssetIndex,
     /// frame offset from center of actor
-    pub offset:Vec2,
+    pub offset: Vec2,
     /// rotate the frame such that it faces facing
-    pub rotate_to_face:bool,
-    pub missile_direct_damage:(f32, f32),
-    pub missile_splash_damage:(f32, f32)
+    pub rotate_to_face: bool,
+    pub missile_direct_damage: (f32, f32),
+    pub missile_splash_damage: (f32, f32),
 }
 
 impl Asset for ActorInfo {
@@ -147,7 +148,7 @@ impl Assets<ImageInfo> {
     }
 }
 
-fn get_f32(prop:&str, props:&Value) -> Option<f32> {
+fn get_f32(prop: &str, props: &Value) -> Option<f32> {
     let Some(v) = props.get(prop) else {
         return None;
     };
@@ -155,7 +156,7 @@ fn get_f32(prop:&str, props:&Value) -> Option<f32> {
         .or(v.as_integer().map(|x| x as f64))
         .map(|x| x as f32)
 }
-fn get_array_string(prop:&str, props:&Value) -> Option<Vec<String>> {
+fn get_array_string(prop: &str, props: &Value) -> Option<Vec<String>> {
     let Some(v) = props.get(prop) else {
         return None;
     };
@@ -174,36 +175,42 @@ fn get_array_string(prop:&str, props:&Value) -> Option<Vec<String>> {
     Some(res)
 }
 
-fn get_bool(prop:&str, props:&Value) -> Option<bool> {
+fn get_bool(prop: &str, props: &Value) -> Option<bool> {
     let Some(v) = props.get(prop) else {
         return None;
     };
     v.as_bool()
 }
 
-fn get_str<'a>(prop:&'a str, props:&'a Value) -> Option<&'a str> {
+fn get_str<'a>(prop: &'a str, props: &'a Value) -> Option<&'a str> {
     let Some(v) = props.get(prop) else {
         return None;
     };
     v.as_str()
 }
 
-fn get_array_f32<'a>(prop:&'a str, props:&'a Value) -> Option<Vec<f32>> {
-    let Some(v) = props.get(prop) else { return None};
-    let Some(v) = v.as_array() else { return None; };
+fn get_array_f32<'a>(prop: &'a str, props: &'a Value) -> Option<Vec<f32>> {
+    let Some(v) = props.get(prop) else {
+        return None;
+    };
+    let Some(v) = v.as_array() else {
+        return None;
+    };
     let mut vec = Vec::new();
     for v in v.iter() {
         match v {
-            Value::Integer(i) => {vec.push(*i as f32)},
-            Value::Float(f) => {vec.push(*f as f32)},
-            _=> {}
+            Value::Integer(i) => vec.push(*i as f32),
+            Value::Float(f) => vec.push(*f as f32),
+            _ => {}
         }
     }
     return Some(vec);
 }
 
-fn get_vec2<'a>(prop:&'a str, props:&'a Value) -> Option<Vec2> {
-    let Some(v) = get_array_f32(prop, props) else { return None; };
+fn get_vec2<'a>(prop: &'a str, props: &'a Value) -> Option<Vec2> {
+    let Some(v) = get_array_f32(prop, props) else {
+        return None;
+    };
     if v.len() == 2 {
         return Some(Vec2::new(v[0], v[1]));
     }
@@ -211,8 +218,10 @@ fn get_vec2<'a>(prop:&'a str, props:&'a Value) -> Option<Vec2> {
     return None;
 }
 
-fn get_tuple_f32<'a>(prop:&'a str, props:&'a Value) -> Option<(f32, f32)> {
-    let Some(v) = get_array_f32(prop, props) else { return None; };
+fn get_tuple_f32<'a>(prop: &'a str, props: &'a Value) -> Option<(f32, f32)> {
+    let Some(v) = get_array_f32(prop, props) else {
+        return None;
+    };
     if v.len() == 2 {
         return Some((v[0], v[1]));
     }
@@ -222,7 +231,7 @@ fn get_tuple_f32<'a>(prop:&'a str, props:&'a Value) -> Option<(f32, f32)> {
 
 impl Assets<WeaponInfo> {
     pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>) {
-        for (name, props ) in table {
+        for (name, props) in table {
             let extends = get_str("extends", &props);
             let base: WeaponInfo = match extends {
                 Some(extends) => self
@@ -245,19 +254,22 @@ impl Assets<WeaponInfo> {
             };
             let rate_of_fire = get_f32("rate_of_fire", &props).unwrap_or(base.rate_of_fire);
             let damage = match get_array_f32("damage", &props) {
-                Some(damage) => [damage.get(0).copied().unwrap_or_default(), damage.get(1).copied().unwrap_or_default()],
+                Some(damage) => [
+                    damage.get(0).copied().unwrap_or_default(),
+                    damage.get(1).copied().unwrap_or_default(),
+                ],
                 None => base.damage,
             };
             let mount = get_f32("mount_offset", &props).unwrap_or(base.mount_offset);
             let muzzle = get_f32("muzzle_offset", &props).unwrap_or(base.muzzle_offset);
-            let  weapon_info = WeaponInfo {
+            let weapon_info = WeaponInfo {
                 index: 0,
                 rate_of_fire,
                 name,
                 frames,
                 damage,
                 mount_offset: mount,
-                muzzle_offset: muzzle
+                muzzle_offset: muzzle,
             };
             self.push(weapon_info)
         }
@@ -265,9 +277,13 @@ impl Assets<WeaponInfo> {
 }
 
 impl Assets<ActorInfo> {
-    pub async fn read_from(&mut self, table: toml::Table, images: &Assets<ImageInfo>, weapons: &Assets<WeaponInfo>) {
+    pub async fn read_from(
+        &mut self,
+        table: toml::Table,
+        images: &Assets<ImageInfo>,
+        weapons: &Assets<WeaponInfo>,
+    ) {
         for (name, props) in table {
-           
             let extends = get_str("extends", &props);
             let base: ActorInfo = match extends {
                 Some(extends) => self
@@ -306,16 +322,16 @@ impl Assets<ActorInfo> {
                     .collect(),
                 None => base.dead_frames,
             };
-            let weapon = match get_str("weapon", &props).and_then(|x|weapons.find(x)) {
+            let weapon = match get_str("weapon", &props).and_then(|x| weapons.find(x)) {
                 Some(wp) => wp.index,
                 None => base.weapon,
             };
-            
+
             let actor_info = ActorInfo {
                 index: 0,
                 name: name.clone(),
                 frames,
-                locomotion_frames:locomotion_frames,
+                locomotion_frames: locomotion_frames,
                 bot: get_bool("bot", &props).unwrap_or(base.bot),
                 speed: get_f32("speed", &props).unwrap_or(base.speed),
                 radius: get_f32("radius", &props).unwrap_or(base.radius),
@@ -323,13 +339,15 @@ impl Assets<ActorInfo> {
                 shootable: get_bool("shootable", &props).unwrap_or(base.shootable),
                 health: get_f32("health", &props).unwrap_or(base.health),
                 solid: get_bool("solid", &props).unwrap_or(base.solid),
-                particle:get_bool("particle", &props).unwrap_or(base.particle),
+                particle: get_bool("particle", &props).unwrap_or(base.particle),
                 weapon,
                 dead_frames,
                 offset: get_vec2("offset", &props).unwrap_or(base.offset),
-                rotate_to_face:get_bool("rotate_to_face", &props).unwrap_or(base.rotate_to_face),
-                missile_direct_damage: get_tuple_f32("missile_direct_damage", &props).unwrap_or(base.missile_direct_damage),
-                missile_splash_damage: get_tuple_f32("missile_splash_damage", &props).unwrap_or(base.missile_splash_damage)
+                rotate_to_face: get_bool("rotate_to_face", &props).unwrap_or(base.rotate_to_face),
+                missile_direct_damage: get_tuple_f32("missile_direct_damage", &props)
+                    .unwrap_or(base.missile_direct_damage),
+                missile_splash_damage: get_tuple_f32("missile_splash_damage", &props)
+                    .unwrap_or(base.missile_splash_damage),
             };
             self.push(actor_info);
         }
