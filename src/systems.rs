@@ -207,11 +207,40 @@ fn input_player(c: &mut Context) {
         attack_dir.y = 1.0;
     }
 
-
     let d = d.normalize_or_zero();
     let Some(mut player) = c.state.actor_mut(c.state.me) else {
         return;
     };
+
+    
+    if is_key_pressed(KeyCode::Key1) {
+        player.weapon = c.metadata.weapons.find("fists").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key2) {
+        player.weapon = c.metadata.weapons.find("pistol").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key3) {
+        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key4) {
+        player.weapon = c.metadata.weapons.find("rifle").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key5) {
+        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key6) {
+        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key7) {
+        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key8) {
+        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+    }
+    if is_key_pressed(KeyCode::Key9) {
+        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+    }
+
     
     if attack_dir.length() == 0.0 {
         // check mouse
