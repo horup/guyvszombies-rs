@@ -23,4 +23,4 @@ frames = ["machinegun", "machinegun_firing"]
 extends = "pistol"
 rate_of_fire = 10
 damage = [2,5]
-spread = 3.4
+spread = 0.2

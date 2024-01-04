@@ -368,8 +368,7 @@ fn attack(c:&mut Context) {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
                 let speed = 15.0;
                 let spawn_pos = actor.muzzle_pos(weapon_info);
-                let spread = rand_f32() * weapon_info.spread;
-                let spread = spread - spread / 2.0;
+                let spread = rand_f32_1_1() * weapon_info.spread;
                 let facing_with_spread = actor.facing + spread;
                 let d = Vec2::new(facing_with_spread.cos(), facing_with_spread.sin());
                 let v = d * speed;
@@ -382,9 +381,15 @@ fn attack(c:&mut Context) {
     }
 }
 
-fn rand_f32() -> f32 {
+fn rand_f32_0_1() -> f32 {
     let v = macroquad::rand::rand() as f32;
     return v / u32::MAX as f32;
+}
+
+fn rand_f32_1_1() -> f32 {
+    let v = rand_f32_0_1();
+    let v = v - 0.5;
+    return v * 2.0;
 }
 
 pub fn game_state(c:&mut Context) {
@@ -434,7 +439,7 @@ pub fn missile_contact(c:&mut Context) {
                     if other_actor.info.shootable {
                         let min_dmg: f32 = actor.info.missile_direct_damage.0;
                         let max_dmg: f32 = actor.info.missile_direct_damage.1;
-                        let dmg = min_dmg + (max_dmg - min_dmg) * rand_f32();
+                        let dmg = min_dmg + (max_dmg - min_dmg) * rand_f32_0_1();
                         let dmg = dmg.floor();
                         hits.push((other_actor.handle, dmg));
                     }
