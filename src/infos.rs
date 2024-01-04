@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use macroquad::file::load_file;
 use toml::Table;
 
@@ -33,6 +35,22 @@ async fn load_and_extend_table(path:&str) -> Table {
     let actors = String::from_utf8(load_file(path).await.unwrap()).unwrap();
     let table: toml::Table = toml::from_str(&actors).unwrap();
     extend_table(table)
+}
+
+type InfoIndex = u16;
+
+pub trait Info {
+    fn name(&self) -> &str;
+    fn index(&self) -> InfoIndex;
+}
+
+pub struct InfoCollection<T> {
+    inner: Vec<T>,
+    name_to_index: HashMap<String, InfoIndex>,
+}
+
+impl<T:Info> InfoCollection<T> {
+    
 }
 
 pub struct Infos {
