@@ -1,7 +1,6 @@
 use macroquad::file::load_file;
 use toml::Table;
 
-pub struct Metadata2 {}
 
 /// Extends the table with content from a 'super' table.
 /// 
@@ -30,12 +29,19 @@ fn extend_table(mut tables: Table) -> Table {
     return tables;
 }
 
-impl Metadata2 {
+async fn load_and_extend_table(path:&str) -> Table {
+    let actors = String::from_utf8(load_file(path).await.unwrap()).unwrap();
+    let table: toml::Table = toml::from_str(&actors).unwrap();
+    extend_table(table)
+}
+
+pub struct Infos {
+    
+}
+impl Infos {
     pub async fn init() -> Self {
-        let actors = String::from_utf8(load_file("assets/actors.toml").await.unwrap()).unwrap();
-        let table: toml::Table = toml::from_str(&actors).unwrap();
-        let table = extend_table(table);
-       
-        Metadata2 {}
+        let actors = load_and_extend_table("assets/actors.toml").await;
+        let weapons = load_and_extend_table("assets/weapons.toml").await;
+        Infos {}
     }
 }

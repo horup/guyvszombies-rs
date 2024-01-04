@@ -8,12 +8,12 @@ mod state;
 pub use state::*;
 mod systems;
 pub use systems::*;
-mod metadata2;
-pub use metadata2::*;
+mod infos;
+pub use infos::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let metadata2 = Metadata2::init().await;
+    let metadata2 = Infos::init().await;
     let images = String::from_utf8(load_file("assets/images.toml").await.unwrap()).unwrap();
     let images:toml::Table = images.parse().unwrap();
     let mut metadata = Metadata::default();
