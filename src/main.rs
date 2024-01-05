@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use macroquad::{prelude::*, miniquad::window::set_mouse_cursor};
 mod context;
 pub use context::*;
@@ -11,7 +10,7 @@ pub use metadata::*;
 mod snapshot;
 pub use snapshot::*;
 
-#[macroquad::main("BasicShapes")]
+#[macroquad::main("Guy vs Zombies!")]
 async fn main() {
     let mut context = Context::default();
     context.metadata = Metadata::new().await;
