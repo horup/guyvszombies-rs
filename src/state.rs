@@ -6,7 +6,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::{ActorInfo, AssetIndex, Metadata, WeaponInfo};
+use crate::{ActorInfo2, WeaponInfo2, Infos};
 
 new_key_type! {
     pub struct ActorHandle;
@@ -104,10 +104,11 @@ impl Clock {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct Actor {
-    pub info: AssetIndex,
-    pub weapon: AssetIndex,
+    pub handle:ActorHandle,
+    pub info: Rc<ActorInfo2>,
+    pub weapon: Rc<WeaponInfo2>,
     pub weapon_cooldown:f32,
     pub pos: Vec2,
     pub locomotion_dir: Vec2,
@@ -160,7 +161,6 @@ pub struct State {
     pub spawner: Clock,
     pub me: ActorHandle,
     pub actors: SlotMap<ActorHandle, Actor>,
-    pub metadata: Rc<Metadata>,
     pub contact_events: Vec<ContactEvent>,
     pub round: u32,
     pub game_state: GameState,
@@ -181,7 +181,7 @@ impl State {
         left
     }
 }
-
+/*
 pub struct ActorBorrow<A, B> {
     pub handle: ActorHandle,
     pub actor: A,
@@ -225,35 +225,34 @@ impl<A: BorrowMut<Actor>, B> DerefMut for ActorBorrow<A, B> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.actor.borrow_mut()
     }
-}
+}*/
 
 impl State {
     pub fn despawn_actor(&mut self, handle: ActorHandle) {
         self.actors.remove(handle);
     }
-    pub fn spawn_actor(&mut self, info_name: &str) -> ActorBorrow<&mut Actor, &ActorInfo> {
-        let actor_info = self
-            .metadata
-            .actors
-            .find(info_name)
-            .expect("could not find actor info");
-        let weapon = actor_info.weapon;
-        let actor = Actor {
-            info: actor_info.index,
-            pos: [0.0, 0.0].into(),
-            locomotion_dir: Default::default(),
-            vel: Default::default(),
-            attack_dir: Default::default(),
-            owner: Default::default(),
-            health: actor_info.health,
-            color: Vec4::new(1.0, 1.0, 1.0, 1.0),
-            pain_timer: Timer::new(0.25),
-            frame: 0.0,
-            facing: 0.0,
-            weapon:weapon,
-            weapon_cooldown:0.0
-        };
-        let handle = self.actors.insert(actor);
+
+    pub fn spawn_actor(&mut self, actor_info:Rc<ActorInfo2>) -> &mut Actor {
+        let weapon = actor_info.weapon.clone();
+        let handle = self.actors.insert_with_key(|handle|{
+            Actor {
+                handle,
+                info: actor_info,
+                pos: [0.0, 0.0].into(),
+                locomotion_dir: Default::default(),
+                vel: Default::default(),
+                attack_dir: Default::default(),
+                owner: Default::default(),
+                health: actor_info.health,
+                color: Vec4::new(1.0, 1.0, 1.0, 1.0),
+                pain_timer: Timer::new(0.25),
+                frame: 0.0,
+                facing: 0.0,
+                weapon:weapon,
+                weapon_cooldown:0.0,
+            }
+        });
+        
         self.actor_mut(handle).unwrap()
     }
 
@@ -261,34 +260,11 @@ impl State {
         self.actors.keys().collect()
     }
 
-    pub fn actor(&self, handle: ActorHandle) -> Option<ActorBorrow<&Actor, &ActorInfo>> {
-        let Some(actor) = self.actors.get(handle) else {
-            return None;
-        };
-        let Some(info) = self.metadata.actors.get(actor.info) else {
-            return None;
-        };
-        Some(ActorBorrow {
-            handle,
-            actor,
-            info,
-        })
+    pub fn actor(&self, handle: ActorHandle) -> Option<&Actor> {
+        self.actors.get(handle)
     }
 
-    pub fn actor_mut(
-        &mut self,
-        handle: ActorHandle,
-    ) -> Option<ActorBorrow<&mut Actor, &ActorInfo>> {
-        let Some(actor) = self.actors.get_mut(handle) else {
-            return None;
-        };
-        let Some(info) = self.metadata.actors.get(actor.info) else {
-            return None;
-        };
-        Some(ActorBorrow {
-            handle,
-            actor,
-            info,
-        })
+    pub fn actor_mut(&self, handle: ActorHandle) -> Option<&mut Actor> {
+        self.actors.get_mut(handle)
     }
 }

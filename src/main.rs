@@ -1,7 +1,5 @@
 use std::rc::Rc;
 use macroquad::{prelude::*, miniquad::window::set_mouse_cursor};
-mod metadata;
-pub use metadata::*;
 mod context;
 pub use context::*;
 mod state;
@@ -13,24 +11,8 @@ pub use infos::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let images = String::from_utf8(load_file("assets/images.toml").await.unwrap()).unwrap();
-    let images:toml::Table = images.parse().unwrap();
-    let mut metadata = Metadata::default();
-    metadata.images.read_from(images).await;
-
-    let weapons = String::from_utf8(load_file("assets/weapons.toml").await.unwrap()).unwrap();
-    let weapons:toml::Table = weapons.parse().unwrap();
-    metadata.weapons.read_from(weapons, &metadata.images).await;
-
-    let actors = String::from_utf8(load_file("assets/actors.toml").await.unwrap()).unwrap();
-    let actors:toml::Table = actors.parse().unwrap();
-    metadata.actors.read_from(actors, &metadata.images, &metadata.weapons).await;
-
     let mut context = Context::default();
     context.infos = Infos::new().await;
-    //context.debug = true;
-    context.metadata = Rc::new(metadata);
-    context.state.metadata = context.metadata.clone();
     systems::once(&mut context);
     set_mouse_cursor(miniquad::CursorIcon::Crosshair);
     loop {
