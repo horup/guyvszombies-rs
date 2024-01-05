@@ -13,7 +13,6 @@ pub use infos::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
-    let metadata2 = Infos::init().await;
     let images = String::from_utf8(load_file("assets/images.toml").await.unwrap()).unwrap();
     let images:toml::Table = images.parse().unwrap();
     let mut metadata = Metadata::default();
@@ -28,6 +27,7 @@ async fn main() {
     metadata.actors.read_from(actors, &metadata.images, &metadata.weapons).await;
 
     let mut context = Context::default();
+    context.infos = Infos::new().await;
     //context.debug = true;
     context.metadata = Rc::new(metadata);
     context.state.metadata = context.metadata.clone();
