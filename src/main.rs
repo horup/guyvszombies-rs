@@ -6,15 +6,15 @@ mod state;
 pub use state::*;
 mod systems;
 pub use systems::*;
-mod infos;
-pub use infos::*;
+mod metadata;
+pub use metadata::*;
 mod snapshot;
 pub use snapshot::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
     let mut context = Context::default();
-    context.infos = Infos::new().await;
+    context.metadata = Metadata::new().await;
     systems::once(&mut context);
     set_mouse_cursor(miniquad::CursorIcon::Crosshair);
     loop {

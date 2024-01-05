@@ -57,7 +57,7 @@ pub struct ActorInfo {
 }
 
 #[derive(Default)]
-pub struct Infos {
+pub struct Metadata {
     pub images: InfoCollection<ImageInfo>,
     pub weapons: InfoCollection<WeaponInfo>,
     pub actors: InfoCollection<ActorInfo>,
@@ -289,7 +289,7 @@ async fn load_actors(
     map
 }
 
-impl Infos {
+impl Metadata {
     pub async fn new() -> Self {
         let images = load_table("assets/images.toml").await;
         let images = load_images(&images).await;
@@ -297,7 +297,7 @@ impl Infos {
         let weapons = load_weapons(&weapons, &images).await;
         let actors = load_and_extend_table("assets/actors.toml").await;
         let actors = load_actors(&actors, &images, &weapons).await;
-        Infos {
+        Metadata {
             images,
             weapons,
             actors,

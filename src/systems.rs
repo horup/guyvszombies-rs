@@ -5,7 +5,7 @@ use crate::{Context, ContactEvent, GameState, Timer, Actor, save_snapshot, load_
 use macroquad::prelude::*;
 
 fn start(c: &mut Context) {
-    let player = c.state.spawn_actor(c.infos.actors.get("guy").unwrap().clone());
+    let player = c.state.spawn_actor(c.metadata.actors.get("guy").unwrap().clone());
     c.state.me = player.handle;
 }
 
@@ -214,16 +214,16 @@ fn input_player(c: &mut Context) {
 
     
     if is_key_pressed(KeyCode::Key1) {
-        player.weapon = c.infos.weapons.get("fist").unwrap().clone()
+        player.weapon = c.metadata.weapons.get("fist").unwrap().clone()
     }
     if is_key_pressed(KeyCode::Key2) {
-        player.weapon = c.infos.weapons.get("pistol").unwrap().clone();
+        player.weapon = c.metadata.weapons.get("pistol").unwrap().clone();
     }
     if is_key_pressed(KeyCode::Key3) {
-        player.weapon = c.infos.weapons.get("machinegun").unwrap().clone();
+        player.weapon = c.metadata.weapons.get("machinegun").unwrap().clone();
     }
     if is_key_pressed(KeyCode::Key4) {
-        player.weapon = c.infos.weapons.get("rifle").unwrap().clone();
+        player.weapon = c.metadata.weapons.get("rifle").unwrap().clone();
     }
     if is_key_pressed(KeyCode::Key5) {
     }
@@ -367,7 +367,7 @@ fn attack(c:&mut Context) {
                 let facing_with_spread = actor.facing + spread;
                 let d = Vec2::new(facing_with_spread.cos(), facing_with_spread.sin());
                 let v = d * speed;
-                let mut bullet = c.state.spawn_actor(c.infos.actors.get("bullet").unwrap().clone());
+                let mut bullet = c.state.spawn_actor(c.metadata.actors.get("bullet").unwrap().clone());
                 bullet.pos = spawn_pos;
                 bullet.vel = v;
                 bullet.facing = facing_with_spread;
@@ -409,7 +409,7 @@ pub fn game_state(c:&mut Context) {
                 let y = r.sin();
                 let r = 15.0;
                 let v = Vec2::new(x * r, y * r);
-                c.state.spawn_actor(c.infos.actors.get("zombie").unwrap().clone()).pos = v;
+                c.state.spawn_actor(c.metadata.actors.get("zombie").unwrap().clone()).pos = v;
             } else {
                 c.state.game_state = GameState::WaitForDefeat;
             }
@@ -446,7 +446,7 @@ pub fn missile_contact(c:&mut Context) {
                     for i in 0..max {
                         let a = i as f32 / max as f32 * PI * 2.0;
                         let v = Vec2::new(a.cos(), a.sin()) * 2.0;
-                        let mut spatter = c.state.spawn_actor(c.infos.actors.get("spatter").unwrap().clone());
+                        let mut spatter = c.state.spawn_actor(c.metadata.actors.get("spatter").unwrap().clone());
                         spatter.pos = pos;
                         spatter.vel = v;
                     }
@@ -509,8 +509,8 @@ fn animation(c:&mut Context) {
 
 fn snapshot(c:&mut Context) {
     if is_key_pressed(KeyCode::F5) {
-        let snapshot = save_snapshot(&c.state, &c.infos);
-        c.state = load_snapshot(&snapshot, &c.infos);
+        let snapshot = save_snapshot(&c.state, &c.metadata);
+        c.state = load_snapshot(&snapshot, &c.metadata);
     }
     else if is_key_pressed(KeyCode::F6) {
 

@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-use crate::{State, Actor, Infos, Clock, ActorHandle, GameState};
+use crate::{State, Actor, Metadata, Clock, ActorHandle, GameState};
 
 #[derive(Serialize, Deserialize)]
 pub struct ActorSnapshot {
@@ -16,7 +16,7 @@ pub struct StateSnapshot {
     pub round: u32,
 }
 
-pub fn save_snapshot(state:&State, infos:&Infos) -> StateSnapshot {
+pub fn save_snapshot(state:&State, md:&Metadata) -> StateSnapshot {
     StateSnapshot {
         spawner: state.spawner.clone(),
         me: state.me.clone(),
@@ -25,7 +25,7 @@ pub fn save_snapshot(state:&State, infos:&Infos) -> StateSnapshot {
     }
 }
 
-pub fn load_snapshot(snapshot:&StateSnapshot, infos:&Infos) -> State {
+pub fn load_snapshot(snapshot:&StateSnapshot, md:&Metadata) -> State {
     State {
         spawner: snapshot.spawner.clone(),
         me: snapshot.me.clone(),

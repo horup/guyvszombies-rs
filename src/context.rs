@@ -1,11 +1,11 @@
 use macroquad::camera::Camera2D;
 
-use crate::{State, Infos};
+use crate::{State, Metadata};
 
 #[derive(Default)]
 pub struct Context {
     pub camera:Camera2D,
-    pub infos:Infos,
+    pub metadata:Metadata,
     pub state:State,
     pub debug:bool
 }
