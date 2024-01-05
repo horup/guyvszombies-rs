@@ -3,11 +3,9 @@ use std::{collections::HashMap, rc::Rc};
 use glam::Vec2;
 use macroquad::{
     file::load_file,
-    texture::{load_texture, Texture2D, Image},
+    texture::{load_texture, Texture2D},
 };
 use toml::{Table, Value};
-
-use crate::FrameIndex;
 
 /// Extends the table with content from a 'super' table.
 ///
