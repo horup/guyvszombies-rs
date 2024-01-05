@@ -27,11 +27,11 @@ pub fn save_snapshot(state:&State, infos:&Infos) -> StateSnapshot {
 
 pub fn load_snapshot(snapshot:&StateSnapshot, infos:&Infos) -> State {
     State {
-        spawner: todo!(),
-        me: todo!(),
-        actors: todo!(),
-        contact_events: todo!(),
-        round: todo!(),
-        game_state: todo!(),
+        spawner: snapshot.spawner.clone(),
+        me: snapshot.me.clone(),
+        actors: Default::default(),
+        contact_events: Default::default(),
+        round: snapshot.round.clone(),
+        game_state: snapshot.game_state.clone(),
     }
 }

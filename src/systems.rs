@@ -1,7 +1,7 @@
 use core::panic;
 use std::f32::consts::PI;
 
-use crate::{Context, ContactEvent, GameState, Timer, Actor};
+use crate::{Context, ContactEvent, GameState, Timer, Actor, save_snapshot, load_snapshot};
 use macroquad::prelude::*;
 
 fn start(c: &mut Context) {
@@ -507,6 +507,16 @@ fn animation(c:&mut Context) {
     }
 }
 
+fn snapshot(c:&mut Context) {
+    if is_key_pressed(KeyCode::F5) {
+        let snapshot = save_snapshot(&c.state, &c.infos);
+        c.state = load_snapshot(&snapshot, &c.infos);
+    }
+    else if is_key_pressed(KeyCode::F6) {
+
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         game_state,
@@ -522,7 +532,8 @@ pub fn tick(c: &mut Context) {
         animation,
         draw,
         draw_debug,
-        draw_hud
+        draw_hud,
+        snapshot
     ];
     for system in systems.iter() {
         system(c);
