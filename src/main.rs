@@ -8,6 +8,8 @@ mod systems;
 pub use systems::*;
 mod infos;
 pub use infos::*;
+mod snapshot;
+pub use snapshot::*;
 
 #[macroquad::main("BasicShapes")]
 async fn main() {
