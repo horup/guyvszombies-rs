@@ -1,12 +1,8 @@
 use glam::{Vec2, Vec4};
 use slotmap::{new_key_type, SlotMap};
-use std::{
-    borrow::{Borrow, BorrowMut},
-    ops::{Deref, DerefMut},
-    rc::Rc,
-};
+use std::rc::Rc;
 
-use crate::{ActorInfo2, WeaponInfo2, Infos};
+use crate::{ActorInfo2, WeaponInfo2};
 
 new_key_type! {
     pub struct ActorHandle;
@@ -16,6 +12,64 @@ new_key_type! {
 pub struct Timer {
     pub timer: f32,
     pub end_time: f32,
+}
+
+#[derive(Default, Clone)]
+pub struct Clock {
+    pub tick: f32,
+}
+
+#[derive(Clone)]
+pub struct Actor {
+    pub handle: ActorHandle,
+    pub info: Rc<ActorInfo2>,
+    pub weapon: Rc<WeaponInfo2>,
+    pub weapon_cooldown: f32,
+    pub pos: Vec2,
+    pub locomotion_dir: Vec2,
+    pub vel: Vec2,
+    pub attack_dir: Vec2,
+    pub owner: ActorHandle,
+    pub health: f32,
+    pub color: Vec4,
+    pub pain_timer: Timer,
+    pub frame: f32,
+    pub facing: f32,
+}
+
+#[derive(Default)]
+pub struct State {
+    pub spawner: Clock,
+    pub me: ActorHandle,
+    pub actors: SlotMap<ActorHandle, Actor>,
+    pub contact_events: Vec<ContactEvent>,
+    pub round: u32,
+    pub game_state: GameState,
+}
+
+#[derive(Default, Clone)]
+pub struct Cooldown {
+    pub heat: f32,
+}
+
+#[derive(Clone)]
+pub enum ContactEvent {
+    Actor {
+        actor: ActorHandle,
+        other_actor: ActorHandle,
+    },
+}
+
+#[derive(Clone)]
+pub enum GameState {
+    Countdown {
+        timer: Timer,
+    },
+    Spawning {
+        mobs_left_to_spawn: u32,
+        mobs_total: u32,
+    },
+    WaitForDefeat,
 }
 
 impl Timer {
@@ -65,11 +119,6 @@ impl Timer {
     }
 }
 
-#[derive(Default, Clone)]
-pub struct Cooldown {
-    pub heat: f32,
-}
-
 impl Cooldown {
     pub fn tick(&mut self, dt: f32) {
         self.heat -= dt;
@@ -88,10 +137,6 @@ impl Cooldown {
     }
 }
 
-#[derive(Default, Clone)]
-pub struct Clock {
-    pub tick: f32,
-}
 impl Clock {
     pub fn tick(&mut self, dt: f32, reset_at: f32) -> bool {
         self.tick += dt;
@@ -104,23 +149,6 @@ impl Clock {
     }
 }
 
-#[derive(Clone)]
-pub struct Actor {
-    pub handle:ActorHandle,
-    pub info: Rc<ActorInfo2>,
-    pub weapon: Rc<WeaponInfo2>,
-    pub weapon_cooldown:f32,
-    pub pos: Vec2,
-    pub locomotion_dir: Vec2,
-    pub vel: Vec2,
-    pub attack_dir: Vec2,
-    pub owner: ActorHandle,
-    pub health: f32,
-    pub color: Vec4,
-    pub pain_timer: Timer,
-    pub frame: f32,
-    pub facing: f32,
-}
 
 impl Actor {
     pub fn facing_vector(&self) -> Vec2 {
@@ -151,25 +179,6 @@ impl Actor {
     }
 }
 
-#[derive(Clone)]
-pub enum ContactEvent {
-    Actor {
-        actor: ActorHandle,
-        other_actor: ActorHandle,
-    },
-}
-
-#[derive(Clone)]
-pub enum GameState {
-    Countdown {
-        timer: Timer,
-    },
-    Spawning {
-        mobs_left_to_spawn: u32,
-        mobs_total: u32,
-    },
-    WaitForDefeat,
-}
 
 impl Default for GameState {
     fn default() -> Self {
@@ -177,16 +186,6 @@ impl Default for GameState {
             timer: Timer::new(5.0),
         }
     }
-}
-
-#[derive(Default)]
-pub struct State {
-    pub spawner: Clock,
-    pub me: ActorHandle,
-    pub actors: SlotMap<ActorHandle, Actor>,
-    pub contact_events: Vec<ContactEvent>,
-    pub round: u32,
-    pub game_state: GameState,
 }
 
 impl State {
@@ -203,79 +202,30 @@ impl State {
 
         left
     }
-}
-/*
-pub struct ActorBorrow<A, B> {
-    pub handle: ActorHandle,
-    pub actor: A,
-    pub info: B,
-}
 
-impl<A: Borrow<Actor>, B: Borrow<ActorInfo>> ActorBorrow<A, B> {
-    pub fn is_alive(&self) -> bool {
-        self.actor.borrow().health > 0.0
-    }
-
-    pub fn is_solid(&self) -> bool {
-        if !self.is_alive() {
-            return false;
-        }
-
-        self.info.borrow().solid
-    }
-
-    pub fn hand_pos(&self) -> Vec2 {
-        let pos = self.pos;
-        let v = self.facing_vector();
-        pos + v * self.info.borrow().radius
-    }
-
-    pub fn muzzle_pos(&self, weapon_info:&WeaponInfo) -> Vec2 {
-        let hand = self.hand_pos();
-        let v = self.facing_vector();
-        hand + v * weapon_info.muzzle_offset
-    }
-}
-
-impl<A: Borrow<Actor>, B> Deref for ActorBorrow<A, B> {
-    type Target = Actor;
-    fn deref(&self) -> &Self::Target {
-        self.actor.borrow()
-    }
-}
-
-impl<A: BorrowMut<Actor>, B> DerefMut for ActorBorrow<A, B> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.actor.borrow_mut()
-    }
-}*/
-
-impl State {
     pub fn despawn_actor(&mut self, handle: ActorHandle) {
         self.actors.remove(handle);
     }
 
-    pub fn spawn_actor(&mut self, actor_info:Rc<ActorInfo2>) -> &mut Actor {
+    pub fn spawn_actor(&mut self, actor_info: Rc<ActorInfo2>) -> &mut Actor {
         let weapon = actor_info.weapon.clone();
-        let handle = self.actors.insert_with_key(|handle|{
-            Actor {
-                handle,
-                health: actor_info.health,
-                info: actor_info,
-                pos: [0.0, 0.0].into(),
-                locomotion_dir: Default::default(),
-                vel: Default::default(),
-                attack_dir: Default::default(),
-                owner: Default::default(),
-                color: Vec4::new(1.0, 1.0, 1.0, 1.0),
-                pain_timer: Timer::new(0.25),
-                frame: 0.0,
-                facing: 0.0,
-                weapon:weapon,
-                weapon_cooldown:0.0,
-            }
+        let handle = self.actors.insert_with_key(|handle| Actor {
+            handle,
+            health: actor_info.health,
+            info: actor_info,
+            pos: [0.0, 0.0].into(),
+            locomotion_dir: Default::default(),
+            vel: Default::default(),
+            attack_dir: Default::default(),
+            owner: Default::default(),
+            color: Vec4::new(1.0, 1.0, 1.0, 1.0),
+            pain_timer: Timer::new(0.25),
+            frame: 0.0,
+            facing: 0.0,
+            weapon: weapon,
+            weapon_cooldown: 0.0,
         });
-        
+
         self.actor_mut(handle).unwrap()
     }
 
