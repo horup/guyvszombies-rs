@@ -126,6 +126,29 @@ impl Actor {
     pub fn facing_vector(&self) -> Vec2 {
         Vec2::new(self.facing.cos(), self.facing.sin())
     }
+    pub fn is_alive(&self) -> bool {
+        self.health > 0.0
+    }
+
+    pub fn is_solid(&self) -> bool {
+        if !self.is_alive() {
+            return false;
+        }
+
+        self.info.solid
+    }
+
+    pub fn hand_pos(&self) -> Vec2 {
+        let pos = self.pos;
+        let v = self.facing_vector();
+        pos + v * self.info.radius
+    }
+
+    pub fn muzzle_pos(&self) -> Vec2 {
+        let hand = self.hand_pos();
+        let v = self.facing_vector();
+        hand + v * self.weapon.muzzle_offset
+    }
 }
 
 #[derive(Clone)]
@@ -237,13 +260,13 @@ impl State {
         let handle = self.actors.insert_with_key(|handle|{
             Actor {
                 handle,
+                health: actor_info.health,
                 info: actor_info,
                 pos: [0.0, 0.0].into(),
                 locomotion_dir: Default::default(),
                 vel: Default::default(),
                 attack_dir: Default::default(),
                 owner: Default::default(),
-                health: actor_info.health,
                 color: Vec4::new(1.0, 1.0, 1.0, 1.0),
                 pain_timer: Timer::new(0.25),
                 frame: 0.0,
@@ -264,7 +287,7 @@ impl State {
         self.actors.get(handle)
     }
 
-    pub fn actor_mut(&self, handle: ActorHandle) -> Option<&mut Actor> {
+    pub fn actor_mut(&mut self, handle: ActorHandle) -> Option<&mut Actor> {
         self.actors.get_mut(handle)
     }
 }

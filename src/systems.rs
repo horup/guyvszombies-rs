@@ -1,11 +1,11 @@
 use core::panic;
 use std::f32::consts::PI;
 
-use crate::{Context, ContactEvent, GameState, Timer, metadata};
+use crate::{Context, ContactEvent, GameState, Timer, Actor};
 use macroquad::prelude::*;
 
 fn start(c: &mut Context) {
-    let player = c.state.spawn_actor("guy");
+    let player = c.state.spawn_actor(c.infos.actors.get("guy").unwrap().clone());
     c.state.me = player.handle;
 }
 
@@ -68,7 +68,7 @@ pub fn draw(c: &mut Context) {
         };
         sorted_actors.push(actor);
     }
-    sorted_actors.sort_by(|a: &crate::ActorBorrow<&crate::Actor, &crate::ActorInfo>,b|a.pos.y.partial_cmp(&b.pos.y).unwrap());
+    sorted_actors.sort_by(|a, b|a.pos.y.partial_cmp(&b.pos.y).unwrap());
 
 
     for actor in sorted_actors.drain(..) {
@@ -87,8 +87,8 @@ pub fn draw(c: &mut Context) {
             continue;
         }
         let f = actor.frame as usize % frames.len();
-        let frame = frames[f];
-        let img = c.metadata.images.get(frame.image).unwrap();
+        let frame: &crate::ImageIndex = &frames[f];
+        let img = &frame.image;
         let texture = &img.texture;
         let size = Vec2::new(2.0, 2.0);
         let x: f32 = actor.pos.x - size.x / 2.0 + actor.info.offset.x;
@@ -115,10 +115,10 @@ pub fn draw(c: &mut Context) {
             },
         );
 
-        let weapon_info = c.metadata.weapons.get(actor.weapon).unwrap();
+        let weapon_info = actor.weapon.clone();
         let texture = weapon_info.frames.get(0);
         if let Some(frame) = texture {
-            let image = c.metadata.images.get(frame.image).unwrap();
+            let image = &frame.image;
             let v = actor.facing_vector();
             let hand = actor.hand_pos();
             let mount: Vec2 =  hand - size / 2.0 + v * weapon_info.mount_offset * size.length();
@@ -131,7 +131,7 @@ pub fn draw(c: &mut Context) {
             });
 
             if c.debug {
-                let muzzle = actor.muzzle_pos(weapon_info);
+                let muzzle = actor.muzzle_pos();
                 draw_circle(hand.x, hand.y, 0.1, GREEN);
                 draw_circle(muzzle.x, muzzle.y, 0.1, RED);
             }
@@ -214,31 +214,26 @@ fn input_player(c: &mut Context) {
 
     
     if is_key_pressed(KeyCode::Key1) {
-        player.weapon = c.metadata.weapons.find("fists").unwrap().index;
+        player.weapon = c.infos.weapons.get("fist").unwrap().clone()
     }
     if is_key_pressed(KeyCode::Key2) {
-        player.weapon = c.metadata.weapons.find("pistol").unwrap().index;
+        player.weapon = c.infos.weapons.get("pistol").unwrap().clone();
     }
     if is_key_pressed(KeyCode::Key3) {
-        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
+        player.weapon = c.infos.weapons.get("machinegun").unwrap().clone();
     }
     if is_key_pressed(KeyCode::Key4) {
-        player.weapon = c.metadata.weapons.find("rifle").unwrap().index;
+        player.weapon = c.infos.weapons.get("rifle").unwrap().clone();
     }
     if is_key_pressed(KeyCode::Key5) {
-        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
     }
     if is_key_pressed(KeyCode::Key6) {
-        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
     }
     if is_key_pressed(KeyCode::Key7) {
-        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
     }
     if is_key_pressed(KeyCode::Key8) {
-        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
     }
     if is_key_pressed(KeyCode::Key9) {
-        player.weapon = c.metadata.weapons.find("machinegun").unwrap().index;
     }
 
     
@@ -363,16 +358,16 @@ fn attack(c:&mut Context) {
             actor.weapon_cooldown = 0.0;
         }
         if actor.attack_dir.length() > 0.0 {
-            let Some(weapon_info) = c.metadata.weapons.get(actor.weapon) else { continue; };
+            let weapon_info = actor.weapon.clone();
             if actor.weapon_cooldown == 0.0 {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
                 let speed = 15.0;
-                let spawn_pos = actor.muzzle_pos(weapon_info);
+                let spawn_pos = actor.muzzle_pos();
                 let spread = rand_f32_1_1() * weapon_info.spread;
                 let facing_with_spread = actor.facing + spread;
                 let d = Vec2::new(facing_with_spread.cos(), facing_with_spread.sin());
                 let v = d * speed;
-                let mut bullet = c.state.spawn_actor("bullet");
+                let mut bullet = c.state.spawn_actor(c.infos.actors.get("bullet").unwrap().clone());
                 bullet.pos = spawn_pos;
                 bullet.vel = v;
                 bullet.facing = facing_with_spread;
@@ -414,7 +409,7 @@ pub fn game_state(c:&mut Context) {
                 let y = r.sin();
                 let r = 15.0;
                 let v = Vec2::new(x * r, y * r);
-                c.state.spawn_actor("zombie").pos = v;
+                c.state.spawn_actor(c.infos.actors.get("zombie").unwrap().clone()).pos = v;
             } else {
                 c.state.game_state = GameState::WaitForDefeat;
             }
@@ -451,7 +446,7 @@ pub fn missile_contact(c:&mut Context) {
                     for i in 0..max {
                         let a = i as f32 / max as f32 * PI * 2.0;
                         let v = Vec2::new(a.cos(), a.sin()) * 2.0;
-                        let mut spatter = c.state.spawn_actor("spatter");
+                        let mut spatter = c.state.spawn_actor(c.infos.actors.get("spatter").unwrap().clone());
                         spatter.pos = pos;
                         spatter.vel = v;
                     }

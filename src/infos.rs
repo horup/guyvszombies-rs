@@ -3,7 +3,7 @@ use std::{collections::HashMap, rc::Rc};
 use glam::Vec2;
 use macroquad::{
     file::load_file,
-    texture::{load_texture, Texture2D},
+    texture::{load_texture, Texture2D}, text,
 };
 use toml::{Table, Value};
 
@@ -207,6 +207,7 @@ async fn load_images(table: &Table) -> InfoCollection<ImageInfo2> {
         let texture = load_texture(&("assets/".to_owned() + path))
             .await
             .expect("failed to load texture");
+        texture.set_filter(macroquad::miniquad::FilterMode::Nearest);
         map.insert(
             name.to_owned(),
             Rc::new(ImageInfo2 {
