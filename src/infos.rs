@@ -150,7 +150,7 @@ fn get_frames<'a>(
     images: &InfoCollection<ImageInfo2>,
 ) -> Vec<ImageIndex> {
     let mut frames = Vec::new();
-    if let Some(props_frames) = get_array_string("frames", props) {
+    if let Some(props_frames) = get_array_string(prop, props) {
         for frame in props_frames.iter() {
             frames.push(ImageIndex {
                 image: images.get(frame).expect("could not find image").clone(),
