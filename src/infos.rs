@@ -9,7 +9,7 @@ use toml::{Table, Value};
 
 type InfoCollection<T> = HashMap<String, Rc<T>>;
 
-pub struct ImageInfo2 {
+pub struct ImageInfo {
     pub name: String,
     pub path: String,
     pub texture: Texture2D,
@@ -17,12 +17,12 @@ pub struct ImageInfo2 {
 
 #[derive(Clone)]
 pub struct ImageIndex {
-    pub image: Rc<ImageInfo2>,
+    pub image: Rc<ImageInfo>,
     pub frame: u16,
 }
 
 #[derive(Clone, Default)]
-pub struct WeaponInfo2 {
+pub struct WeaponInfo {
     pub name: String,
     pub rate_of_fire: f32,
     pub frames: Vec<ImageIndex>,
@@ -33,7 +33,7 @@ pub struct WeaponInfo2 {
 }
 
 #[derive(Clone)]
-pub struct ActorInfo2 {
+pub struct ActorInfo {
     pub name: String,
     pub frames: Vec<ImageIndex>,
     pub locomotion_frames: Vec<ImageIndex>,
@@ -47,7 +47,7 @@ pub struct ActorInfo2 {
     pub solid: bool,
     pub particle: bool,
     /// current active weapon
-    pub weapon: Rc<WeaponInfo2>,
+    pub weapon: Rc<WeaponInfo>,
     /// frame offset from center of actor
     pub offset: Vec2,
     /// rotate the frame such that it faces facing
@@ -58,9 +58,9 @@ pub struct ActorInfo2 {
 
 #[derive(Default)]
 pub struct Infos {
-    pub images: InfoCollection<ImageInfo2>,
-    pub weapons: InfoCollection<WeaponInfo2>,
-    pub actors: InfoCollection<ActorInfo2>,
+    pub images: InfoCollection<ImageInfo>,
+    pub weapons: InfoCollection<WeaponInfo>,
+    pub actors: InfoCollection<ActorInfo>,
 }
 
 fn get_f32(prop: &str, props: &Value) -> Option<f32> {
@@ -147,7 +147,7 @@ fn get_tuple_f32<'a>(prop: &'a str, props: &'a Value) -> Option<(f32, f32)> {
 fn get_frames<'a>(
     prop: &'a str,
     props: &'a Value,
-    images: &InfoCollection<ImageInfo2>,
+    images: &InfoCollection<ImageInfo>,
 ) -> Vec<ImageIndex> {
     let mut frames = Vec::new();
     if let Some(props_frames) = get_array_string(prop, props) {
@@ -200,7 +200,7 @@ async fn load_table(path: &str) -> Table {
     toml::from_str(&table).unwrap()
 }
 
-async fn load_images(table: &Table) -> InfoCollection<ImageInfo2> {
+async fn load_images(table: &Table) -> InfoCollection<ImageInfo> {
     let mut map = HashMap::default();
     for (name, value) in table.iter() {
         let Some(path) = value.as_str() else { continue; };
@@ -210,7 +210,7 @@ async fn load_images(table: &Table) -> InfoCollection<ImageInfo2> {
         texture.set_filter(macroquad::miniquad::FilterMode::Nearest);
         map.insert(
             name.to_owned(),
-            Rc::new(ImageInfo2 {
+            Rc::new(ImageInfo {
                 name: name.to_owned(),
                 path: path.to_owned(),
                 texture,
@@ -222,10 +222,10 @@ async fn load_images(table: &Table) -> InfoCollection<ImageInfo2> {
 
 async fn load_weapons(
     table: &Table,
-    images: &InfoCollection<ImageInfo2>,
-) -> HashMap<String, Rc<WeaponInfo2>> {
+    images: &InfoCollection<ImageInfo>,
+) -> HashMap<String, Rc<WeaponInfo>> {
     let mut map = InfoCollection::default();
-    map.insert("".to_string(), Rc::new(WeaponInfo2::default()));
+    map.insert("".to_string(), Rc::new(WeaponInfo::default()));
     for (name, props) in table.iter() {
         let damage = match get_array_f32("damage", &props) {
             Some(damage) => [
@@ -237,7 +237,7 @@ async fn load_weapons(
 
         map.insert(
             name.to_owned(),
-            Rc::new(WeaponInfo2 {
+            Rc::new(WeaponInfo {
                 name: name.to_owned(),
                 rate_of_fire: get_f32("rate_of_fire", props).unwrap_or_default(),
                 frames: get_frames("frames", props, images),
@@ -253,14 +253,14 @@ async fn load_weapons(
 
 async fn load_actors(
     table: &Table,
-    images: &InfoCollection<ImageInfo2>,
-    weapons: &InfoCollection<WeaponInfo2>,
-) -> InfoCollection<ActorInfo2> {
+    images: &InfoCollection<ImageInfo>,
+    weapons: &InfoCollection<WeaponInfo>,
+) -> InfoCollection<ActorInfo> {
     let mut map = InfoCollection::default();
     for (name, props) in table.iter() {
         map.insert(
             name.to_owned(),
-            Rc::new(ActorInfo2 {
+            Rc::new(ActorInfo {
                 name: name.to_owned(),
                 frames: get_frames("frames", props, images),
                 locomotion_frames: get_frames("locomotion_frames", props, images),

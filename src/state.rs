@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 use slotmap::{new_key_type, SlotMap};
 use std::rc::Rc;
 
-use crate::{ActorInfo2, WeaponInfo2};
+use crate::{ActorInfo, WeaponInfo};
 
 new_key_type! {
     pub struct ActorHandle;
@@ -23,8 +23,8 @@ pub struct Clock {
 #[derive(Clone)]
 pub struct Actor {
     pub handle: ActorHandle,
-    pub info: Rc<ActorInfo2>,
-    pub weapon: Rc<WeaponInfo2>,
+    pub info: Rc<ActorInfo>,
+    pub weapon: Rc<WeaponInfo>,
     pub weapon_cooldown: f32,
     pub pos: Vec2,
     pub locomotion_dir: Vec2,
@@ -208,7 +208,7 @@ impl State {
         self.actors.remove(handle);
     }
 
-    pub fn spawn_actor(&mut self, actor_info: Rc<ActorInfo2>) -> &mut Actor {
+    pub fn spawn_actor(&mut self, actor_info: Rc<ActorInfo>) -> &mut Actor {
         let weapon = actor_info.weapon.clone();
         let handle = self.actors.insert_with_key(|handle| Actor {
             handle,
