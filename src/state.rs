@@ -1,4 +1,5 @@
 use glam::{Vec2, Vec4};
+use serde::{Serialize, Deserialize};
 use slotmap::{new_key_type, SlotMap};
 use std::rc::Rc;
 
@@ -8,13 +9,13 @@ new_key_type! {
     pub struct ActorHandle;
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct Timer {
     pub timer: f32,
     pub end_time: f32,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct Clock {
     pub tick: f32,
 }
@@ -47,7 +48,7 @@ pub struct State {
     pub game_state: GameState,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct Cooldown {
     pub heat: f32,
 }
@@ -60,7 +61,7 @@ pub enum ContactEvent {
     },
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum GameState {
     Countdown {
         timer: Timer,
