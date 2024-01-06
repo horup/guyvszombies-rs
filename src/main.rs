@@ -9,8 +9,6 @@ mod metadata;
 pub use metadata::*;
 mod snapshot;
 pub use snapshot::*;
-mod arena;
-pub use arena::*;
 
 #[macroquad::main("Guy vs Zombies!")]
 async fn main() {
