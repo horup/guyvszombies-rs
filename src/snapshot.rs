@@ -1,3 +1,5 @@
+//! Contains serializable data structures that captures the runtime state of the game
+
 use serde::{Deserialize, Serialize};
 use slotmap::SlotMap;
 
