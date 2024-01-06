@@ -1,5 +1,5 @@
 use core::panic;
-use std::f32::consts::PI;
+use std::{f32::consts::PI, io::{Write, Read}};
 
 use crate::{Context, ContactEvent, GameState, Timer, Actor, StateSnapshot};
 use macroquad::prelude::*;
@@ -509,12 +509,16 @@ fn animation(c:&mut Context) {
 
 fn snapshot(c:&mut Context) {
     if is_key_pressed(KeyCode::F5) {
-        let snapshot = StateSnapshot::save_snapshot(&c.state, &c.metadata);
-        c.state = StateSnapshot::load_snapshot(&snapshot, &c.metadata);
-        
+        let snapshot = StateSnapshot::create_snapshot(&c.state, &c.metadata);
+        let bytes = bincode::serialize(&snapshot).unwrap();
+        std::fs::File::create("quicksave.sav").unwrap().write_all(&bytes).unwrap();
     }
     else if is_key_pressed(KeyCode::F6) {
-
+        let Ok(mut file) = std::fs::File::open("quicksave.sav") else { return };
+        let mut buf = Vec::new();
+        let Ok(size) = file.read_to_end(&mut buf) else { return };
+        let snapshot:StateSnapshot = bincode::deserialize(&buf).unwrap();
+        c.state = snapshot.load_snapshot(&c.metadata);
     }
 }
 

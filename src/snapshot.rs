@@ -20,7 +20,7 @@ pub struct StateSnapshot {
 }
 
 impl StateSnapshot {
-    pub fn save_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
+    pub fn create_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
         let mut actor_snapshots = Vec::default();
         let mut me = 0;
         for (handle, actor) in state.actors.iter() {
@@ -42,27 +42,27 @@ impl StateSnapshot {
         }
     }
     
-    pub fn load_snapshot(snapshot: &StateSnapshot, md: &Metadata) -> State {
+    pub fn load_snapshot(self: &Self, md: &Metadata) -> State {
         let mut actors = SlotMap::default();
         let mut me = ActorHandle::default();
-        for (index, actor) in snapshot.actors.iter().enumerate() {
+        for (index, actor) in self.actors.iter().enumerate() {
             let handle = actors.insert_with_key(|handle| Actor {
                 handle,
                 info: md.actors.get(&actor.info).unwrap().clone(),
                 weapon: md.weapons.get(&actor.weapon).unwrap().clone(),
                 state: actor.state.clone(),
             });
-            if index == snapshot.me {
+            if index == self.me {
                 me = handle;
             }
         }
         State {
-            spawner: snapshot.spawner.clone(),
+            spawner: self.spawner.clone(),
             me,
             actors: actors,
             contact_events: Default::default(),
-            round: snapshot.round.clone(),
-            game_state: snapshot.game_state.clone(),
+            round: self.round.clone(),
+            game_state: self.game_state.clone(),
         }
     }
 }
