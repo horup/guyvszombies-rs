@@ -19,48 +19,50 @@ pub struct StateSnapshot {
     pub actors: Vec<ActorSnapshot>,
 }
 
-pub fn save_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
-    let mut actor_snapshots = Vec::default();
-    let mut me = 0;
-    for (handle, actor) in state.actors.iter() {
-        if state.me == handle {
-            me = actor_snapshots.len();
+impl StateSnapshot {
+    pub fn save_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
+        let mut actor_snapshots = Vec::default();
+        let mut me = 0;
+        for (handle, actor) in state.actors.iter() {
+            if state.me == handle {
+                me = actor_snapshots.len();
+            }
+            actor_snapshots.push(ActorSnapshot {
+                info: actor.info.name.clone(),
+                weapon: actor.weapon.name.clone(),
+                state: actor.state.clone(),
+            });
         }
-        actor_snapshots.push(ActorSnapshot {
-            info: actor.info.name.clone(),
-            weapon: actor.weapon.name.clone(),
-            state: actor.state.clone(),
-        });
-    }
-    StateSnapshot {
-        spawner: state.spawner.clone(),
-        me,
-        game_state: state.game_state.clone(),
-        round: state.round.clone(),
-        actors: actor_snapshots,
-    }
-}
-
-pub fn load_snapshot(snapshot: &StateSnapshot, md: &Metadata) -> State {
-    let mut actors = SlotMap::default();
-    let mut me = ActorHandle::default();
-    for (index, actor) in snapshot.actors.iter().enumerate() {
-        let handle = actors.insert_with_key(|handle| Actor {
-            handle,
-            info: md.actors.get(&actor.info).unwrap().clone(),
-            weapon: md.weapons.get(&actor.weapon).unwrap().clone(),
-            state: actor.state.clone(),
-        });
-        if index == snapshot.me {
-            me = handle;
+        StateSnapshot {
+            spawner: state.spawner.clone(),
+            me,
+            game_state: state.game_state.clone(),
+            round: state.round.clone(),
+            actors: actor_snapshots,
         }
     }
-    State {
-        spawner: snapshot.spawner.clone(),
-        me,
-        actors: actors,
-        contact_events: Default::default(),
-        round: snapshot.round.clone(),
-        game_state: snapshot.game_state.clone(),
+    
+    pub fn load_snapshot(snapshot: &StateSnapshot, md: &Metadata) -> State {
+        let mut actors = SlotMap::default();
+        let mut me = ActorHandle::default();
+        for (index, actor) in snapshot.actors.iter().enumerate() {
+            let handle = actors.insert_with_key(|handle| Actor {
+                handle,
+                info: md.actors.get(&actor.info).unwrap().clone(),
+                weapon: md.weapons.get(&actor.weapon).unwrap().clone(),
+                state: actor.state.clone(),
+            });
+            if index == snapshot.me {
+                me = handle;
+            }
+        }
+        State {
+            spawner: snapshot.spawner.clone(),
+            me,
+            actors: actors,
+            contact_events: Default::default(),
+            round: snapshot.round.clone(),
+            game_state: snapshot.game_state.clone(),
+        }
     }
 }
