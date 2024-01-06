@@ -9,7 +9,7 @@ edition = "2021"
 macroquad = "0.4.4"
 toml = {version = "0.8.8", features = ["preserve_order"]}
 slotmap = {version = "1.0.7", features = ["serde"]}
-glam = {version = "0.21.3", features = ["scalar-math"] }
+glam = {version = "0.21.3", features = ["scalar-math", "serde"] }
 parry2d = "0.13.5"
 flat_spatial = "0.6.0"
 serde = {version = "1.0.193", features = ["derive"]}

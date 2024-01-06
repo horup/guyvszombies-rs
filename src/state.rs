@@ -1,7 +1,7 @@
 use glam::{Vec2, Vec4};
 use serde::{Serialize, Deserialize};
 use slotmap::{new_key_type, SlotMap};
-use std::rc::Rc;
+use std::{rc::Rc, ops::{Deref, DerefMut}};
 
 use crate::{ActorInfo, WeaponInfo};
 
@@ -20,11 +20,8 @@ pub struct Clock {
     pub tick: f32,
 }
 
-#[derive(Clone)]
-pub struct Actor {
-    pub handle: ActorHandle,
-    pub info: Rc<ActorInfo>,
-    pub weapon: Rc<WeaponInfo>,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ActorState {
     pub weapon_cooldown: f32,
     pub pos: Vec2,
     pub locomotion_dir: Vec2,
@@ -36,6 +33,14 @@ pub struct Actor {
     pub pain_timer: Timer,
     pub frame: f32,
     pub facing: f32,
+}
+
+#[derive(Clone)]
+pub struct Actor {
+    pub handle: ActorHandle,
+    pub info: Rc<ActorInfo>,
+    pub weapon: Rc<WeaponInfo>,
+    pub state:ActorState
 }
 
 #[derive(Default)]
@@ -150,6 +155,19 @@ impl Clock {
     }
 }
 
+impl Deref for Actor {
+    type Target = ActorState;
+
+    fn deref(&self) -> &Self::Target {
+        &self.state
+    }
+}
+
+impl DerefMut for Actor {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.state
+    }
+}
 
 impl Actor {
     pub fn facing_vector(&self) -> Vec2 {
@@ -212,19 +230,21 @@ impl State {
         let weapon = actor_info.weapon.clone();
         let handle = self.actors.insert_with_key(|handle| Actor {
             handle,
-            health: actor_info.health,
+            state: ActorState {
+                health: actor_info.health,
+                pos: [0.0, 0.0].into(),
+                locomotion_dir: Default::default(),
+                vel: Default::default(),
+                attack_dir: Default::default(),
+                owner: Default::default(),
+                color: Vec4::new(1.0, 1.0, 1.0, 1.0),
+                pain_timer: Timer::new(0.25),
+                frame: 0.0,
+                facing: 0.0,
+                weapon_cooldown: 0.0,
+            },
             info: actor_info,
-            pos: [0.0, 0.0].into(),
-            locomotion_dir: Default::default(),
-            vel: Default::default(),
-            attack_dir: Default::default(),
-            owner: Default::default(),
-            color: Vec4::new(1.0, 1.0, 1.0, 1.0),
-            pain_timer: Timer::new(0.25),
-            frame: 0.0,
-            facing: 0.0,
             weapon: weapon,
-            weapon_cooldown: 0.0,
         });
 
         self.actor_mut(handle).unwrap()
