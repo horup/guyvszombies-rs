@@ -1,17 +1,19 @@
 use serde::{Deserialize, Serialize};
 use slotmap::SlotMap;
 
-use crate::{Actor, ActorHandle, Clock, GameState, Metadata, State};
+use crate::{Actor, ActorHandle, ActorState, Clock, GameState, Metadata, State};
 
 #[derive(Serialize, Deserialize)]
 pub struct ActorSnapshot {
-    pub handle: ActorHandle,
+    pub info: String,
+    pub weapon: String,
+    pub state: ActorState,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct StateSnapshot {
     pub spawner: Clock,
-    pub me: ActorHandle,
+    pub me: usize,
     pub game_state: GameState,
     pub round: u32,
     pub actors: Vec<ActorSnapshot>,
@@ -19,14 +21,20 @@ pub struct StateSnapshot {
 
 pub fn save_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
     let mut actor_snapshots = Vec::default();
+    let mut me = 0;
     for (handle, actor) in state.actors.iter() {
-        actor_snapshots.push(ActorSnapshot { 
-            handle: handle 
+        if state.me == handle {
+            me = actor_snapshots.len();
+        }
+        actor_snapshots.push(ActorSnapshot {
+            info: actor.info.name.clone(),
+            weapon: actor.weapon.name.clone(),
+            state: actor.state.clone(),
         });
     }
     StateSnapshot {
         spawner: state.spawner.clone(),
-        me: state.me.clone(),
+        me,
         game_state: state.game_state.clone(),
         round: state.round.clone(),
         actors: actor_snapshots,
@@ -35,9 +43,21 @@ pub fn save_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
 
 pub fn load_snapshot(snapshot: &StateSnapshot, md: &Metadata) -> State {
     let mut actors = SlotMap::default();
+    let mut me = ActorHandle::default();
+    for (index, actor) in snapshot.actors.iter().enumerate() {
+        let handle = actors.insert_with_key(|handle| Actor {
+            handle,
+            info: md.actors.get(&actor.info).unwrap().clone(),
+            weapon: md.weapons.get(&actor.weapon).unwrap().clone(),
+            state: actor.state.clone(),
+        });
+        if index == snapshot.me {
+            me = handle;
+        }
+    }
     State {
         spawner: snapshot.spawner.clone(),
-        me: snapshot.me.clone(),
+        me,
         actors: actors,
         contact_events: Default::default(),
         round: snapshot.round.clone(),
