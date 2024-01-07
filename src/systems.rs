@@ -214,7 +214,7 @@ fn input_player(c: &mut Context) {
 
     
     if is_key_pressed(KeyCode::Key1) {
-        player.weapon = c.metadata.weapons.get("fist").unwrap().clone()
+        player.weapon = c.metadata.weapons.get("fists").unwrap().clone()
     }
     if is_key_pressed(KeyCode::Key2) {
         player.weapon = c.metadata.weapons.get("pistol").unwrap().clone();
