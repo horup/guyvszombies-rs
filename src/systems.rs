@@ -363,7 +363,8 @@ fn attack(c:&mut Context) {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
                 if weapon_info.melee {
                     let ray = actor.attack_dir.clone();
-                    dbg!(ray);
+                    let origin = actor.pos.clone();
+                    
                 } else {
                     let speed = 15.0;
                     let spawn_pos = actor.muzzle_pos();
