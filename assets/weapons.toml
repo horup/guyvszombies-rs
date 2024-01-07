@@ -2,6 +2,7 @@
 display_name = "Fists"
 rate_of_fire = 1
 damage = [3,6]
+melee = true
 
 [pistol]
 display_name = "Pistol"

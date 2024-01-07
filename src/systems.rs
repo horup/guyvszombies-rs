@@ -361,16 +361,21 @@ fn attack(c:&mut Context) {
             let weapon_info = actor.weapon.clone();
             if actor.weapon_cooldown == 0.0 {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
-                let speed = 15.0;
-                let spawn_pos = actor.muzzle_pos();
-                let spread = rand_f32_1_1() * weapon_info.spread;
-                let facing_with_spread = actor.facing + spread;
-                let d = Vec2::new(facing_with_spread.cos(), facing_with_spread.sin());
-                let v = d * speed;
-                let mut bullet = c.state.spawn_actor(c.metadata.actors.get("bullet").unwrap().clone());
-                bullet.pos = spawn_pos;
-                bullet.vel = v;
-                bullet.facing = facing_with_spread;
+                if weapon_info.melee {
+                    let ray = actor.attack_dir.clone();
+                    dbg!(ray);
+                } else {
+                    let speed = 15.0;
+                    let spawn_pos = actor.muzzle_pos();
+                    let spread = rand_f32_1_1() * weapon_info.spread;
+                    let facing_with_spread = actor.facing + spread;
+                    let d = Vec2::new(facing_with_spread.cos(), facing_with_spread.sin());
+                    let v = d * speed;
+                    let bullet = c.state.spawn_actor(c.metadata.actors.get("bullet").unwrap().clone());
+                    bullet.pos = spawn_pos;
+                    bullet.vel = v;
+                    bullet.facing = facing_with_spread;
+                }
             }
         }
     }

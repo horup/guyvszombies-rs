@@ -30,6 +30,7 @@ pub struct WeaponInfo {
     pub mount_offset: f32,
     pub muzzle_offset: f32,
     pub spread: f32,
+    pub melee:bool
 }
 
 #[derive(Clone)]
@@ -245,6 +246,7 @@ async fn load_weapons(
                 mount_offset: get_f32("mount_offset", props).unwrap_or_default(),
                 muzzle_offset: get_f32("muzzle_offset", props).unwrap_or_default(),
                 spread: get_f32("spread", props).unwrap_or_default(),
+                melee: get_bool("melee", props).unwrap_or_default()
             }),
         );
     }
