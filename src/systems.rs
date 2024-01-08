@@ -531,7 +531,6 @@ fn age(c:&mut Context) {
         let actor = c.state.actor_mut(actor_handle).unwrap();
         actor.age += dt;
         if actor.info.max_age > 0.0 {
-            dbg!("lol");
             if actor.age >= actor.info.max_age {
                 c.state.despawn_actor(actor_handle);
             }
