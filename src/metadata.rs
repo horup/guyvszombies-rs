@@ -3,7 +3,8 @@ use std::{collections::HashMap, rc::Rc};
 use glam::Vec2;
 use macroquad::{
     file::load_file,
-    texture::{load_texture, Texture2D}, text,
+    text,
+    texture::{load_texture, Texture2D},
 };
 use toml::{Table, Value};
 
@@ -30,7 +31,7 @@ pub struct WeaponInfo {
     pub mount_offset: f32,
     pub muzzle_offset: f32,
     pub spread: f32,
-    pub projectile:String
+    pub projectile: String,
 }
 
 #[derive(Clone)]
@@ -55,6 +56,8 @@ pub struct ActorInfo {
     pub rotate_to_face: bool,
     pub missile_direct_damage: (f32, f32),
     pub missile_splash_damage: (f32, f32),
+    /// despawn after actor has existed for max_age
+    pub max_age: f32,
 }
 
 #[derive(Default)]
@@ -246,7 +249,7 @@ async fn load_weapons(
                 mount_offset: get_f32("mount_offset", props).unwrap_or_default(),
                 muzzle_offset: get_f32("muzzle_offset", props).unwrap_or_default(),
                 spread: get_f32("spread", props).unwrap_or_default(),
-                projectile: get_str("projectile", props).unwrap_or_default().to_string()
+                projectile: get_str("projectile", props).unwrap_or_default().to_string(),
             }),
         );
     }
@@ -259,6 +262,7 @@ async fn load_actors(
     weapons: &InfoCollection<WeaponInfo>,
 ) -> InfoCollection<ActorInfo> {
     let mut map = InfoCollection::default();
+
     for (name, props) in table.iter() {
         map.insert(
             name.to_owned(),
@@ -285,6 +289,7 @@ async fn load_actors(
                     .unwrap_or_default(),
                 missile_splash_damage: get_tuple_f32("missile_splash_damage", props)
                     .unwrap_or_default(),
+                max_age: get_f32("max_age", props).unwrap_or_default(),
             }),
         );
     }

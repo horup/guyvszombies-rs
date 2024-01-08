@@ -524,6 +524,21 @@ fn snapshot(c:&mut Context) {
     }
 }
 
+/// Increment age of actors and despawn the actor if its age reaches max_age (unless max_age is zero)
+fn age(c:&mut Context) {
+    let dt = get_frame_time();
+    for actor_handle in c.state.actor_handles() {
+        let actor = c.state.actor_mut(actor_handle).unwrap();
+        actor.age += dt;
+        if actor.info.max_age > 0.0 {
+            dbg!("lol");
+            if actor.age >= actor.info.max_age {
+                c.state.despawn_actor(actor_handle);
+            }
+        }
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         game_state,
@@ -537,6 +552,7 @@ pub fn tick(c: &mut Context) {
         particle,
         pain_timer,
         animation,
+        age,
         draw,
         draw_debug,
         draw_hud,

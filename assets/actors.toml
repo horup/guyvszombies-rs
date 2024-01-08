@@ -42,10 +42,12 @@ radius = 0.0
 missile = true
 rotate_to_face = true
 missile_direct_damage = [10,10]
+max_age = 10.0
 
 [fists]
 extends = "missile"
-frames = []
+frames = ["bullet"]
+max_age = 0.5
 
 [bullet]
 extends = "missile"

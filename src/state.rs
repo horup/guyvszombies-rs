@@ -33,6 +33,7 @@ pub struct ActorState {
     pub pain_timer: Timer,
     pub frame: f32,
     pub facing: f32,
+    pub age:f32
 }
 
 #[derive(Clone)]
@@ -242,6 +243,7 @@ impl State {
                 frame: 0.0,
                 facing: 0.0,
                 weapon_cooldown: 0.0,
+                age:0.0
             },
             info: actor_info,
             weapon: weapon,
