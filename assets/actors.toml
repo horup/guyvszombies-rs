@@ -46,8 +46,8 @@ max_age = 10.0
 
 [fists]
 extends = "missile"
-frames = ["bullet"]
-max_age = 0.5
+frames = ["fist"]
+max_age = 0.1
 
 [bullet]
 extends = "missile"
