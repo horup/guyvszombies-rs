@@ -43,6 +43,10 @@ missile = true
 rotate_to_face = true
 missile_direct_damage = [10,10]
 
+[fists]
+extends = "missile"
+frames = []
+
 [bullet]
 extends = "missile"
 frames = ["bullet"]

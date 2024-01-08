@@ -2,7 +2,7 @@
 display_name = "Fists"
 rate_of_fire = 1
 damage = [3,6]
-melee = true
+projectile = "fists"
 
 [pistol]
 display_name = "Pistol"
@@ -12,6 +12,7 @@ damage = [5,10]
 #mount = [0.33,0.62]
 mount_offset = 0.15
 muzzle_offset = 1.0
+projectile = "bullet"
 
 
 [rifle]
