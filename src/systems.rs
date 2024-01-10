@@ -1,21 +1,11 @@
 use core::panic;
 use std::{f32::consts::PI, io::{Write, Read}};
 
-use crate::{Context, ContactEvent, GameState, Timer, Actor, StateSnapshot};
+use crate::{Context, ContactEvent, GameState, Timer, Actor, StateSnapshot, State};
 use macroquad::prelude::*;
 
-fn start(c: &mut Context) {
-    let player = c.state.spawn_actor(c.metadata.actors.get("guy").unwrap().clone());
-    c.state.me = player.handle;
-}
 
-pub fn once(c: &mut Context) {
-    let systems = [start];
-    for system in systems.iter() {
-        system(c);
-    }
-}
-
+/// Updates the camera based upon the size of the screen, by ensuring zoom is set to the correct level
 pub fn camera(c: &mut Context) {
     let width = screen_width();
     let height = screen_height();
@@ -27,8 +17,8 @@ pub fn camera(c: &mut Context) {
     c.camera.zoom = Vec2::new(zoom, zoom * aspect);
 }
 
-pub fn input_bot(c: &mut Context) {
-    //let dt: f32 = get_frame_time();
+/// Updates all bots, ensuring their bot logic has run and that the corrosponding bot actors have been updated
+pub fn bots(c: &mut Context) {
     for actor in c.state.actor_handles() {
         let Some(bot) = c.state.actor(actor) else {
             continue;
@@ -46,7 +36,7 @@ pub fn input_bot(c: &mut Context) {
         let v = player.pos - bot.pos;
         let d = v.normalize_or_zero();
        
-        let mut bot = c.state.actor_mut(actor).unwrap();
+        let bot = c.state.actor_mut(actor).unwrap();
         if d.x < 0.0 {
             bot.facing = PI;
         } else if d.x > 0.0 {
@@ -175,7 +165,8 @@ fn draw_debug(c:&mut Context) {
     }
 }
 
-fn input_player(c: &mut Context) {
+/// Collects input from the player and update the player actor based upon this input
+fn player(c: &mut Context) {
     let mut d = Vec2::new(0.0, 0.0);
     if is_key_pressed(KeyCode::F1) {
         c.debug = !c.debug;
@@ -235,7 +226,6 @@ fn input_player(c: &mut Context) {
     }
     if is_key_pressed(KeyCode::Key9) {
     }
-
     
     if attack_dir.length() == 0.0 {
         // check mouse
@@ -251,13 +241,12 @@ fn input_player(c: &mut Context) {
         }
     }
 
-
     player.attack_dir = attack_dir;
     player.locomotion_dir = d;
     
 }
 
-fn apply_locomotion(c: &mut Context) {
+fn actor_locomotion(c: &mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let mut actor = c.state.actor_mut(handle).unwrap();
@@ -281,7 +270,10 @@ fn apply_locomotion(c: &mut Context) {
     }
 }
 
-fn apply_vel(c: &mut Context) {
+/// Update actors position based upon their velocity.
+/// 
+/// Collects `ContactEvent` for later processing
+fn actor_physics(c: &mut Context) {
     c.state.contact_events.clear();
     let mut actor_handles = c.state.actor_handles();
     let mut spatial = flat_spatial::Grid::new(1);
@@ -349,7 +341,9 @@ fn apply_vel(c: &mut Context) {
     }
 }
 
-fn attack(c:&mut Context) {
+/// Updates and handle actors whom are attacking with their weapons. 
+/// Ensures that projectiles are spawned based upon the attack state.
+fn actor_attack(c:&mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
         let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
@@ -389,6 +383,8 @@ fn rand_f32_1_1() -> f32 {
     return v * 2.0;
 }
 
+/// updates the game_state struct with the current state of the game and
+/// ensures transition to other states
 pub fn game_state(c:&mut Context) {
     let dt = get_frame_time();
     match &mut c.state.game_state {
@@ -424,6 +420,7 @@ pub fn game_state(c:&mut Context) {
     }
 }
 
+/// Handle missile actors whom are part of `ContactEvent`.
 pub fn missile_contact(c:&mut Context) {
     let contacts = c.state.contact_events.clone();
     let mut hits = Vec::new();
@@ -462,13 +459,12 @@ pub fn missile_contact(c:&mut Context) {
         actor.health -= dmg;
         let et = actor.pain_timer.end_time;
         actor.pain_timer.restart(et);
-
-        /*if actor.health <= 0.0 {
-            c.state.despawn_actor(actor_handle);
-        }*/
     }
 }
 
+/// Update particle actors.
+/// These are despawned when their health is reduced to zero. 
+/// Their alpha color is reduced to zero over time.
 fn particle(c:&mut Context) {
     let dt = get_frame_time();
     for actor_handle in c.state.actor_handles() {
@@ -484,6 +480,8 @@ fn particle(c:&mut Context) {
     }
 }
 
+/// Updates the pain timer of actors.
+/// Paints the actor redish based upon the timer value.
 fn pain_timer(c:&mut Context) {
     let dt = get_frame_time();
     for actor_handle in c.state.actor_handles() {
@@ -501,6 +499,8 @@ fn pain_timer(c:&mut Context) {
     }
 }
 
+/// Updates the frame value of actors.
+/// Loops through frames.
 fn animation(c:&mut Context) {
     let dt = get_frame_time();
     for actor_handle in c.state.actor_handles() {
@@ -509,6 +509,7 @@ fn animation(c:&mut Context) {
     }
 }
 
+/// Persist and Restore `StateSnapshot` to disk. 
 fn snapshot(c:&mut Context) {
     if is_key_pressed(KeyCode::F5) {
         let snapshot = StateSnapshot::create_snapshot(&c.state, &c.metadata);
@@ -538,15 +539,29 @@ fn age(c:&mut Context) {
     }
 }
 
+/// Clears and starts the game by spawning the player
+fn start(c: &mut Context) {
+    c.state = State::default();
+    let player = c.state.spawn_actor(c.metadata.actors.get("guy").unwrap().clone());
+    c.state.me = player.handle;
+}
+
+pub fn once(c: &mut Context) {
+    let systems = [start];
+    for system in systems.iter() {
+        system(c);
+    }
+}
+
 pub fn tick(c: &mut Context) {
     let systems = [
         game_state,
         camera,
-        input_player,
-        input_bot,
-        attack,
-        apply_locomotion,
-        apply_vel,
+        player,
+        bots,
+        actor_attack,
+        actor_locomotion,
+        actor_physics,
         missile_contact,
         particle,
         pain_timer,
