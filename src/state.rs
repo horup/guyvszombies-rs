@@ -121,7 +121,7 @@ impl Timer {
             return true;
         }
 
-        return false;
+        false
     }
 
     pub fn is_done(&self) -> bool {
@@ -151,7 +151,7 @@ impl Cooldown {
             return true;
         }
 
-        return false;
+        false
     }
 }
 
@@ -163,7 +163,7 @@ impl Clock {
             return true;
         }
 
-        return false;
+        false
     }
 }
 
@@ -282,7 +282,7 @@ impl State {
                 age: 0.0,
             },
             info: actor_info,
-            weapon: weapon,
+            weapon,
         });
 
         self.actor_mut(handle).unwrap()

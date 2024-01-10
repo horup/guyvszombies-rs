@@ -40,13 +40,13 @@ impl StateSnapshot {
             spawner: state.spawner.clone(),
             me,
             game_state: state.game_state.clone(),
-            round: state.round.clone(),
+            round: state.round,
             actors: actor_snapshots,
-            bounds: state.bounds.clone()
+            bounds: state.bounds
         }
     }
     
-    pub fn load_snapshot(self: &Self, md: &Metadata) -> State {
+    pub fn load_snapshot(&self, md: &Metadata) -> State {
         let mut actors = SlotMap::default();
         let mut me = ActorHandle::default();
         for (index, actor) in self.actors.iter().enumerate() {
@@ -63,11 +63,11 @@ impl StateSnapshot {
         State {
             spawner: self.spawner.clone(),
             me,
-            actors: actors,
+            actors,
             contact_events: Default::default(),
-            round: self.round.clone(),
+            round: self.round,
             game_state: self.game_state.clone(),
-            bounds: self.bounds.clone()
+            bounds: self.bounds
         }
     }
 }

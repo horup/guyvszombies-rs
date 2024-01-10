@@ -26,7 +26,7 @@ pub fn bots(c: &mut Context) {
         if !bot.is_alive() {
             continue;
         }
-        if bot.info.bot == false {
+        if !bot.info.bot {
             continue;
         }
         let Some(player) = c.state.actor(c.state.me) else {
@@ -69,11 +69,11 @@ pub fn draw(c: &mut Context) {
         if actor.health <= 0.0 {
             frames = &actor.info.dead_frames;
         }
-        if frames.len() == 0 {
+        if frames.is_empty() {
             frames = &actor.info.frames;
         }
 
-        if frames.len() == 0 {
+        if frames.is_empty() {
             continue;
         }
         let f = actor.frame as usize % frames.len();
@@ -116,7 +116,7 @@ pub fn draw(c: &mut Context) {
             draw_texture_ex(&image.texture, mount.x, mount.y, WHITE, DrawTextureParams {
                 dest_size: Some(size),
                 rotation:actor.facing,
-                flip_y:if v.x < 0.0 { true } else { false },
+                flip_y:v.x < 0.0,
                 ..Default::default()
             });
 
@@ -166,7 +166,7 @@ pub fn draw_hud(c:&mut Context) {
 }
 
 fn draw_debug(c:&mut Context) {
-    if c.debug == false { return };
+    if !c.debug { return };
     for actor_handle in c.state.actor_handles() {
         let Some(actor) = c.state.actor(actor_handle) else { continue;};
         let r = actor.info.radius;
@@ -276,7 +276,7 @@ fn actor_locomotion(c: &mut Context) {
         let delta_len = delta_vel.length();
         let delta_dir = delta_vel.normalize_or_zero();
         let add_speed = delta_len.min(max_acceleration);
-        actor.vel = actor.vel + delta_dir * add_speed;
+        actor.vel += delta_dir * add_speed;
 
         /*if actor.locomotion_dir.length() > 0.0 {
             let d = actor.locomotion_dir.normalize_or_zero();
@@ -344,7 +344,7 @@ fn actor_physics(c: &mut Context) {
                     };
 
                     let push_back = Vec2::new(contact.normal1.x, contact.normal1.y) * contact.dist;
-                    new_pos = new_pos + push_back;
+                    new_pos += push_back;
                     // TODO maybe avoid generating multiple contact events
                     let ce = ContactEvent::Actor { actor: handle, other_actor: handle2 };
                     c.state.contact_events.push(ce);
@@ -390,13 +390,13 @@ fn actor_attack(c:&mut Context) {
 
 fn rand_f32_0_1() -> f32 {
     let v = macroquad::rand::rand() as f32;
-    return v / u32::MAX as f32;
+    v / u32::MAX as f32
 }
 
 fn rand_f32_1_1() -> f32 {
     let v = rand_f32_0_1();
     let v = v - 0.5;
-    return v * 2.0;
+    v * 2.0
 }
 
 /// updates the game_state struct with the current state of the game and
@@ -547,10 +547,8 @@ fn age(c:&mut Context) {
     for actor_handle in c.state.actor_handles() {
         let actor = c.state.actor_mut(actor_handle).unwrap();
         actor.age += dt;
-        if actor.info.max_age > 0.0 {
-            if actor.age >= actor.info.max_age {
-                c.state.despawn_actor(actor_handle);
-            }
+        if actor.info.max_age > 0.0 && actor.age >= actor.info.max_age {
+            c.state.despawn_actor(actor_handle);
         }
     }
 }

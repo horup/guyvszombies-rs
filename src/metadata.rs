@@ -122,7 +122,7 @@ fn get_array_f32<'a>(prop: &'a str, props: &'a Value) -> Option<Vec<f32>> {
             _ => {}
         }
     }
-    return Some(vec);
+    Some(vec)
 }
 
 fn get_vec2<'a>(prop: &'a str, props: &'a Value) -> Option<Vec2> {
@@ -133,7 +133,7 @@ fn get_vec2<'a>(prop: &'a str, props: &'a Value) -> Option<Vec2> {
         return Some(Vec2::new(v[0], v[1]));
     }
 
-    return None;
+    None
 }
 
 fn get_tuple_f32<'a>(prop: &'a str, props: &'a Value) -> Option<(f32, f32)> {
@@ -144,7 +144,7 @@ fn get_tuple_f32<'a>(prop: &'a str, props: &'a Value) -> Option<(f32, f32)> {
         return Some((v[0], v[1]));
     }
 
-    return None;
+    None
 }
 
 fn get_frames<'a>(
@@ -188,7 +188,7 @@ fn extend_table(mut tables: Table) -> Table {
         tables.insert(name.clone(), toml::Value::Table(final_table));
     }
 
-    return tables;
+    tables
 }
 
 /// Load table from path and extend it using the `extend_table` function
@@ -230,9 +230,9 @@ async fn load_weapons(
     let mut map = InfoCollection::default();
     map.insert("".to_string(), Rc::new(WeaponInfo::default()));
     for (name, props) in table.iter() {
-        let damage = match get_array_f32("damage", &props) {
+        let damage = match get_array_f32("damage", props) {
             Some(damage) => [
-                damage.get(0).copied().unwrap_or_default(),
+                damage.first().copied().unwrap_or_default(),
                 damage.get(1).copied().unwrap_or_default(),
             ],
             None => [0.0, 0.0],
@@ -244,7 +244,7 @@ async fn load_weapons(
                 name: name.to_owned(),
                 rate_of_fire: get_f32("rate_of_fire", props).unwrap_or_default(),
                 frames: get_frames("frames", props, images),
-                damage: damage,
+                damage,
                 mount_offset: get_f32("mount_offset", props).unwrap_or_default(),
                 muzzle_offset: get_f32("muzzle_offset", props).unwrap_or_default(),
                 spread: get_f32("spread", props).unwrap_or_default(),
