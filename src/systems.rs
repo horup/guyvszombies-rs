@@ -163,6 +163,9 @@ fn draw_debug(c:&mut Context) {
         let v = Vec2::new(actor.facing.cos(), actor.facing.sin());
         draw_line(actor.pos.x, actor.pos.y, actor.pos.x + v.x, actor.pos.y + v.y, 0.05, GREEN);
     }
+
+    let b = c.state.bounds;
+    draw_rectangle_lines(b.left, b.top, b.width, b.height, 0.1, RED);
 }
 
 /// Collects input from the player and update the player actor based upon this input
@@ -543,7 +546,6 @@ fn age(c:&mut Context) {
 pub fn player_bounds(c:&mut Context) {
     let b = c.state.bounds;
     if let Some(actor) = c.state.actor_mut(c.state.me){
-        dbg!(b.left + b.width);
         actor.pos = actor.pos.clamp([b.left, b.top].into(), [b.right(), b.bottom()].into());
     }
 }

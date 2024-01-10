@@ -230,8 +230,8 @@ impl Rect {
 
 impl Default for State {
     fn default() -> Self {
-        let w = 8.0;
-        let h = 6.0;
+        let w = 23.0;
+        let h = 15.0;
         Self {
             spawner: Default::default(),
             me: Default::default(),
