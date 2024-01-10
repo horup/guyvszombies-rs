@@ -1,7 +1,10 @@
 use glam::{Vec2, Vec4};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use slotmap::{new_key_type, SlotMap};
-use std::{rc::Rc, ops::{Deref, DerefMut}};
+use std::{
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
 use crate::{ActorInfo, WeaponInfo};
 
@@ -33,7 +36,7 @@ pub struct ActorState {
     pub pain_timer: Timer,
     pub frame: f32,
     pub facing: f32,
-    pub age:f32
+    pub age: f32,
 }
 
 #[derive(Clone)]
@@ -41,10 +44,17 @@ pub struct Actor {
     pub handle: ActorHandle,
     pub info: Rc<ActorInfo>,
     pub weapon: Rc<WeaponInfo>,
-    pub state:ActorState
+    pub state: ActorState,
 }
 
-#[derive(Default)]
+#[derive(Clone, Copy, Default, Serialize, Deserialize)]
+pub struct Rect {
+    pub left: f32,
+    pub top: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
 pub struct State {
     pub spawner: Clock,
     pub me: ActorHandle,
@@ -52,6 +62,7 @@ pub struct State {
     pub contact_events: Vec<ContactEvent>,
     pub round: u32,
     pub game_state: GameState,
+    pub bounds: Rect,
 }
 
 #[derive(Default, Clone, Serialize, Deserialize)]
@@ -199,11 +210,36 @@ impl Actor {
     }
 }
 
-
 impl Default for GameState {
     fn default() -> Self {
         Self::Countdown {
             timer: Timer::new(5.0),
+        }
+    }
+}
+
+impl Rect {
+    pub fn right(&self) -> f32 {
+        self.left + self.width
+    }
+
+    pub fn bottom(&self) -> f32 {
+        self.top + self.height
+    }
+}
+
+impl Default for State {
+    fn default() -> Self {
+        let w = 8.0;
+        let h = 6.0;
+        Self {
+            spawner: Default::default(),
+            me: Default::default(),
+            actors: Default::default(),
+            contact_events: Default::default(),
+            round: Default::default(),
+            game_state: Default::default(),
+            bounds: Rect { left: -w / 2.0, top: -h / 2.0, width: w, height: h },
         }
     }
 }
@@ -243,7 +279,7 @@ impl State {
                 frame: 0.0,
                 facing: 0.0,
                 weapon_cooldown: 0.0,
-                age:0.0
+                age: 0.0,
             },
             info: actor_info,
             weapon: weapon,

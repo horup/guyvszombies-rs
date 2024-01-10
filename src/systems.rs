@@ -539,6 +539,16 @@ fn age(c:&mut Context) {
     }
 }
 
+/// Ensures players are not able to leave the bounds of the game
+pub fn player_bounds(c:&mut Context) {
+    let b = c.state.bounds;
+    if let Some(actor) = c.state.actor_mut(c.state.me){
+        dbg!(b.left + b.width);
+        actor.pos = actor.pos.clamp([b.left, b.top].into(), [b.right(), b.bottom()].into());
+    }
+}
+
+
 /// Clears and starts the game by spawning the player
 fn start(c: &mut Context) {
     c.state = State::default();
@@ -562,6 +572,7 @@ pub fn tick(c: &mut Context) {
         actor_attack,
         actor_locomotion,
         actor_physics,
+        player_bounds,
         missile_contact,
         particle,
         pain_timer,

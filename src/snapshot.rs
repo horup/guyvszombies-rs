@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use slotmap::SlotMap;
 
-use crate::{Actor, ActorHandle, ActorState, Clock, GameState, Metadata, State};
+use crate::{Actor, ActorHandle, ActorState, Clock, GameState, Metadata, State, state::Rect};
 
 #[derive(Serialize, Deserialize)]
 pub struct ActorSnapshot {
@@ -19,6 +19,7 @@ pub struct StateSnapshot {
     pub game_state: GameState,
     pub round: u32,
     pub actors: Vec<ActorSnapshot>,
+    pub bounds: Rect
 }
 
 impl StateSnapshot {
@@ -41,6 +42,7 @@ impl StateSnapshot {
             game_state: state.game_state.clone(),
             round: state.round.clone(),
             actors: actor_snapshots,
+            bounds: state.bounds.clone()
         }
     }
     
@@ -65,6 +67,7 @@ impl StateSnapshot {
             contact_events: Default::default(),
             round: self.round.clone(),
             game_state: self.game_state.clone(),
+            bounds: self.bounds.clone()
         }
     }
 }
