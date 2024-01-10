@@ -130,6 +130,19 @@ pub fn draw(c: &mut Context) {
 
 }
 
+/// Draw the bounds of the game.
+fn draw_bounds(c:&mut Context) {
+    let b = c.state.bounds;
+    let top_left = c.camera.world_to_screen([b.left, b.top].into());
+    let bottom_right = c.camera.world_to_screen([b.right(), b.bottom()].into());
+    set_default_camera();
+    let color = Color { r: 0.0, g: 0.0, b: 0.0, a: 0.8 };
+    draw_rectangle(top_left.x, 0.0, bottom_right.x - top_left.x, top_left.y, color);
+    draw_rectangle(top_left.x, bottom_right.y, bottom_right.x - top_left.x, screen_height() - bottom_right.y, color);
+    draw_rectangle(0.0, 0.0, top_left.x, screen_height(), color);
+    draw_rectangle(bottom_right.x, 0.0, screen_width() - top_left.x, screen_height(), color);
+}
+
 
 pub fn draw_hud(c:&mut Context) {
     set_default_camera();
@@ -581,6 +594,7 @@ pub fn tick(c: &mut Context) {
         animation,
         age,
         draw,
+        draw_bounds,
         draw_debug,
         draw_hud,
         snapshot
