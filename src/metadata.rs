@@ -3,7 +3,6 @@ use std::{collections::HashMap, rc::Rc};
 use glam::Vec2;
 use macroquad::{
     file::load_file,
-    text,
     texture::{load_texture, Texture2D},
 };
 use toml::{Table, Value};

@@ -1,7 +1,7 @@
-use core::panic;
+
 use std::{f32::consts::PI, io::{Write, Read}};
 
-use crate::{Context, ContactEvent, GameState, Timer, Actor, StateSnapshot, State};
+use crate::{Context, ContactEvent, GameState, Timer, StateSnapshot, State};
 use macroquad::prelude::*;
 
 
@@ -215,7 +215,7 @@ fn player(c: &mut Context) {
     }
 
     let d = d.normalize_or_zero();
-    let Some(mut player) = c.state.actor_mut(c.state.me) else {
+    let Some(player) = c.state.actor_mut(c.state.me) else {
         return;
     };
 
@@ -265,7 +265,7 @@ fn player(c: &mut Context) {
 fn actor_locomotion(c: &mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
-        let mut actor = c.state.actor_mut(handle).unwrap();
+        let actor = c.state.actor_mut(handle).unwrap();
         if !actor.is_alive() {
             actor.locomotion_dir = Vec2::default();
         }
@@ -352,7 +352,7 @@ fn actor_physics(c: &mut Context) {
             }
         }
 
-        let mut actor = c.state.actor_mut(handle).unwrap();
+        let actor = c.state.actor_mut(handle).unwrap();
         actor.pos = new_pos;
     }
 }
@@ -362,7 +362,7 @@ fn actor_physics(c: &mut Context) {
 fn actor_attack(c:&mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
-        let Some(mut actor) = c.state.actor_mut(actor) else { continue;};
+        let Some(actor) = c.state.actor_mut(actor) else { continue;};
         actor.weapon_cooldown -= dt;
         if actor.weapon_cooldown < 0.0 {
             actor.weapon_cooldown = 0.0;
@@ -413,7 +413,7 @@ pub fn game_state(c:&mut Context) {
                 c.state.game_state = GameState::Spawning { mobs_left_to_spawn: mobs_to_spawn, mobs_total: mobs_to_spawn };
             }
         },
-        crate::GameState::Spawning { mobs_left_to_spawn, mobs_total } => {
+        crate::GameState::Spawning { mobs_left_to_spawn, mobs_total: _ } => {
             if *mobs_left_to_spawn > 0 {
                 *mobs_left_to_spawn -= 1;
                 let r = macroquad::rand::rand() / 365;
@@ -461,7 +461,7 @@ pub fn missile_contact(c:&mut Context) {
                     for i in 0..max {
                         let a = i as f32 / max as f32 * PI * 2.0;
                         let v = Vec2::new(a.cos(), a.sin()) * 2.0;
-                        let mut spatter = c.state.spawn_actor(c.metadata.actors.get("spatter").unwrap().clone());
+                        let spatter = c.state.spawn_actor(c.metadata.actors.get("spatter").unwrap().clone());
                         spatter.pos = pos;
                         spatter.vel = v;
                     }
@@ -471,7 +471,7 @@ pub fn missile_contact(c:&mut Context) {
     }
 
     for (actor_handle, dmg) in hits.drain(..) {
-        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue;};
+        let Some(actor) = c.state.actor_mut(actor_handle) else { continue;};
         actor.health -= dmg;
         let et = actor.pain_timer.end_time;
         actor.pain_timer.restart(et);
@@ -484,7 +484,7 @@ pub fn missile_contact(c:&mut Context) {
 fn particle(c:&mut Context) {
     let dt = get_frame_time();
     for actor_handle in c.state.actor_handles() {
-        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; };
+        let Some(actor) = c.state.actor_mut(actor_handle) else { continue; };
         if actor.info.particle {
             actor.health -= dt;
             let a = actor.health / actor.info.health;
@@ -501,7 +501,7 @@ fn particle(c:&mut Context) {
 fn pain_timer(c:&mut Context) {
     let dt = get_frame_time();
     for actor_handle in c.state.actor_handles() {
-        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; }; {
+        let Some(actor) = c.state.actor_mut(actor_handle) else { continue; }; {
             actor.pain_timer.tick(dt);
             let mut a = actor.pain_timer.alpha();
             if a < 0.5 {
@@ -520,7 +520,7 @@ fn pain_timer(c:&mut Context) {
 fn animation(c:&mut Context) {
     let dt = get_frame_time();
     for actor_handle in c.state.actor_handles() {
-        let Some(mut actor) = c.state.actor_mut(actor_handle) else { continue; };
+        let Some(actor) = c.state.actor_mut(actor_handle) else { continue; };
         actor.frame += 10.0 * dt;
     }
 }
@@ -535,7 +535,7 @@ fn snapshot(c:&mut Context) {
     else if is_key_pressed(KeyCode::F6) {
         let Ok(mut file) = std::fs::File::open("quicksave.sav") else { return };
         let mut buf = Vec::new();
-        let Ok(size) = file.read_to_end(&mut buf) else { return };
+        let Ok(_size) = file.read_to_end(&mut buf) else { return };
         let snapshot:StateSnapshot = bincode::deserialize(&buf).unwrap();
         c.state = snapshot.load_snapshot(&c.metadata);
     }

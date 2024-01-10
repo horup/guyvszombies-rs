@@ -23,7 +23,7 @@ pub struct StateSnapshot {
 }
 
 impl StateSnapshot {
-    pub fn create_snapshot(state: &State, md: &Metadata) -> StateSnapshot {
+    pub fn create_snapshot(state: &State, _md: &Metadata) -> StateSnapshot {
         let mut actor_snapshots = Vec::default();
         let mut me = 0;
         for (handle, actor) in state.actors.iter() {
