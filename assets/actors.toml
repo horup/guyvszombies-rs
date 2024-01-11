@@ -53,7 +53,7 @@ velocity = 5.0
 
 [bullet]
 extends = "missile"
-frames = ["bullet"]
+frames = ["bullet", "bullet_flipped"]
 
 [spatter]
 extends = "particle"
