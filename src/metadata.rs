@@ -57,6 +57,8 @@ pub struct ActorInfo {
     pub missile_splash_damage: (f32, f32),
     /// despawn after actor has existed for max_age
     pub max_age: f32,
+    /// actors starts with this velocity
+    pub velocity:f32
 }
 
 #[derive(Default)]
@@ -289,6 +291,7 @@ async fn load_actors(
                 missile_splash_damage: get_tuple_f32("missile_splash_damage", props)
                     .unwrap_or_default(),
                 max_age: get_f32("max_age", props).unwrap_or_default(),
+                velocity: get_f32("velocity", props).unwrap_or_default()
             }),
         );
     }

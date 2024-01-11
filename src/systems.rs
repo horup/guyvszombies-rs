@@ -372,7 +372,7 @@ fn actor_attack(c:&mut Context) {
             if actor.weapon_cooldown == 0.0 {
                 actor.weapon_cooldown = 1.0 / weapon_info.rate_of_fire;
                 if let Some(projectile_actor_info) = c.metadata.actors.get(&weapon_info.projectile) {
-                    let speed = 15.0;
+                    let speed = projectile_actor_info.velocity;
                     let spawn_pos = actor.muzzle_pos();
                     let spread = rand_f32_1_1() * weapon_info.spread;
                     let facing_with_spread = actor.facing + spread;

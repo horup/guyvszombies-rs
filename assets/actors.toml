@@ -43,11 +43,13 @@ missile = true
 rotate_to_face = true
 missile_direct_damage = [10,10]
 max_age = 10.0
+velocity = 30.0
 
 [fists]
 extends = "missile"
 frames = ["fist"]
-max_age = 0.05
+max_age = 0.10
+velocity = 5.0
 
 [bullet]
 extends = "missile"
