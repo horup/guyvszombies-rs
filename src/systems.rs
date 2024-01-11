@@ -77,7 +77,9 @@ pub fn draw(c: &mut Context) {
             continue;
         }
         let f = actor.frame as usize % frames.len();
+       
         let frame: &crate::ImageIndex = &frames[f];
+        
         let img = &frame.image;
         let texture = &img.texture;
         let size = Vec2::new(2.0, 2.0);
