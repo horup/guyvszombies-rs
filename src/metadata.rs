@@ -31,6 +31,7 @@ pub struct WeaponInfo {
     pub muzzle_offset: f32,
     pub spread: f32,
     pub projectile: String,
+    pub range:f32
 }
 
 #[derive(Clone)]
@@ -251,6 +252,7 @@ async fn load_weapons(
                 muzzle_offset: get_f32("muzzle_offset", props).unwrap_or_default(),
                 spread: get_f32("spread", props).unwrap_or_default(),
                 projectile: get_str("projectile", props).unwrap_or_default().to_string(),
+                range: get_f32("range", props).unwrap_or_default()
             }),
         );
     }

@@ -32,17 +32,24 @@ pub fn bots(c: &mut Context) {
         let Some(player) = c.state.actor(c.state.me) else {
             continue;
         };
-
+        let player_is_alive = player.is_alive();
         let v = player.pos - bot.pos;
-        let d = v.normalize_or_zero();
+        let range_to_player = v.length();
+        let direction_to_player = v.normalize_or_zero();
        
         let bot = c.state.actor_mut(actor).unwrap();
-        if d.x < 0.0 {
-            bot.facing = PI;
-        } else if d.x > 0.0 {
-            bot.facing = 0.0;
+        if player_is_alive {
+            bot.facing = f32::atan2(direction_to_player.y, direction_to_player.x);
+            bot.locomotion_dir = direction_to_player;
+        } else {
+            bot.locomotion_dir = Default::default();
         }
-        bot.locomotion_dir = d;
+        
+        if player_is_alive && range_to_player < bot.weapon.range && player_is_alive {
+            bot.attack_dir = v.normalize_or_zero().clone();
+        } else {
+            bot.attack_dir = Default::default();
+        }
     }
 }
 
@@ -107,25 +114,28 @@ pub fn draw(c: &mut Context) {
             },
         );
 
-        let weapon_info = actor.weapon.clone();
-        let texture = weapon_info.frames.get(0);
-        if let Some(frame) = texture {
-            let image = &frame.image;
-            let v = actor.facing_vector();
-            let hand = actor.hand_pos();
-            let mount: Vec2 =  hand - size / 2.0 + v * weapon_info.mount_offset * size.length();
-            
-            draw_texture_ex(&image.texture, mount.x, mount.y, WHITE, DrawTextureParams {
-                dest_size: Some(size),
-                rotation:actor.facing,
-                flip_y:v.x < 0.0,
-                ..Default::default()
-            });
-
-            if c.debug {
-                let muzzle = actor.muzzle_pos();
-                draw_circle(hand.x, hand.y, 0.1, GREEN);
-                draw_circle(muzzle.x, muzzle.y, 0.1, RED);
+        // only draw weapons for alive actors
+        if actor.is_alive() {
+            let weapon_info = actor.weapon.clone();
+            let texture = weapon_info.frames.get(0);
+            if let Some(frame) = texture {
+                let image = &frame.image;
+                let v = actor.facing_vector();
+                let hand = actor.hand_pos();
+                let mount: Vec2 =  hand - size / 2.0 + v * weapon_info.mount_offset * size.length();
+                
+                draw_texture_ex(&image.texture, mount.x, mount.y, WHITE, DrawTextureParams {
+                    dest_size: Some(size),
+                    rotation:actor.facing,
+                    flip_y:v.x < 0.0,
+                    ..Default::default()
+                });
+    
+                if c.debug {
+                    let muzzle = actor.muzzle_pos();
+                    draw_circle(hand.x, hand.y, 0.1, GREEN);
+                    draw_circle(muzzle.x, muzzle.y, 0.1, RED);
+                }
             }
         }
     }
@@ -155,14 +165,21 @@ pub fn draw_hud(c:&mut Context) {
     let m = measure_text(&s, None, font_size, 1.0);
     draw_text(&s, x - m.width / 2.0, y, font_size as f32, WHITE);
 
+    fn draw_text_center(str:&str, font_size: u16) {
+        let x = screen_width() / 2.0;
+        let y = screen_height() / 2.0;
+        let m = measure_text(str, None, font_size, 1.0);
+        draw_text(str, x - m.width / 2.0, y, font_size as f32, WHITE);
+    }
+
     match &c.state.game_state {
         GameState::Countdown { timer } => {
-            let x = screen_width() / 2.0;
-            let y = screen_height() / 2.0;
             let s = format!("Next round starting in {:.2} seconds", &timer.time_left());
-            let m = measure_text(&s, None, font_size, 1.0);
-            draw_text(&s, x - m.width / 2.0, y, font_size as f32, WHITE);
+            draw_text_center(&s, font_size);
         },
+        GameState::ReadyToRespawn => {
+            draw_text_center(&"You died! Click to restart!", font_size);
+        }
         _ => {}
     }
 }
@@ -221,6 +238,10 @@ fn player(c: &mut Context) {
         return;
     };
 
+
+    if player.is_alive() == false {
+        return;
+    }
     
     if is_key_pressed(KeyCode::Key1) {
         player.weapon = c.metadata.weapons.get("fists").unwrap().clone()
@@ -264,7 +285,7 @@ fn player(c: &mut Context) {
     
 }
 
-fn actor_locomotion(c: &mut Context) {
+fn locomotion(c: &mut Context) {
     let dt = get_frame_time();
     for handle in c.state.actor_handles() {
         let actor = c.state.actor_mut(handle).unwrap();
@@ -291,7 +312,7 @@ fn actor_locomotion(c: &mut Context) {
 /// Update actors position based upon their velocity.
 /// 
 /// Collects `ContactEvent` for later processing
-fn actor_physics(c: &mut Context) {
+fn physics(c: &mut Context) {
     c.state.contact_events.clear();
     let mut actor_handles = c.state.actor_handles();
     let mut spatial = flat_spatial::Grid::new(1);
@@ -361,10 +382,13 @@ fn actor_physics(c: &mut Context) {
 
 /// Updates and handle actors whom are attacking with their weapons. 
 /// Ensures that projectiles are spawned based upon the attack state.
-fn actor_attack(c:&mut Context) {
+fn attack(c:&mut Context) {
     let dt = get_frame_time();
     for actor in c.state.actor_handles() {
         let Some(actor) = c.state.actor_mut(actor) else { continue;};
+        if actor.is_alive() == false {
+            continue;
+        }
         actor.weapon_cooldown -= dt;
         if actor.weapon_cooldown < 0.0 {
             actor.weapon_cooldown = 0.0;
@@ -434,7 +458,22 @@ pub fn game_state(c:&mut Context) {
             if c.state.mobs_left() == 0 {
                 c.state.game_state = GameState::Countdown { timer: Timer::start(5.0) };
             }
+            let Some(player) = c.state.actor(c.state.me) else { return };
+            if player.is_alive() == false {
+                c.state.game_state = GameState::WaitForReadyToRespawn { timer: Timer::start(1.0) }
+            }
         },
+        crate::GameState::WaitForReadyToRespawn { timer } => {
+            timer.tick(dt);
+            if timer.is_done() {
+                c.state.game_state = GameState::ReadyToRespawn
+            }
+        },
+        crate::GameState::ReadyToRespawn => {
+            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
+                start(c);
+            }
+        }
     }
 }
 
@@ -584,9 +623,9 @@ pub fn tick(c: &mut Context) {
         camera,
         player,
         bots,
-        actor_attack,
-        actor_locomotion,
-        actor_physics,
+        attack,
+        locomotion,
+        physics,
         player_bounds,
         missile_contact,
         particle,

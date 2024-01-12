@@ -88,10 +88,14 @@ pub enum GameState {
         mobs_total: u32,
     },
     WaitForDefeat,
+    WaitForReadyToRespawn {
+        timer: Timer
+    },
+    ReadyToRespawn
 }
 
 impl Timer {
-    pub fn new(end_time: f32) -> Self {
+    pub fn stop(end_time: f32) -> Self {
         Self {
             timer: end_time,
             end_time,
@@ -213,7 +217,7 @@ impl Actor {
 impl Default for GameState {
     fn default() -> Self {
         Self::Countdown {
-            timer: Timer::new(5.0),
+            timer: Timer::stop(5.0),
         }
     }
 }
@@ -275,7 +279,7 @@ impl State {
                 attack_dir: Default::default(),
                 owner: Default::default(),
                 color: Vec4::new(1.0, 1.0, 1.0, 1.0),
-                pain_timer: Timer::new(0.25),
+                pain_timer: Timer::stop(0.25),
                 frame: 0.0,
                 facing: 0.0,
                 weapon_cooldown: 0.0,

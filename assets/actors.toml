@@ -1,5 +1,6 @@
 [default]
 weapon = "pistol"
+range = 100.0
 
 [decoration]
 
@@ -22,6 +23,7 @@ bot = true
 [guy]
 extends = "creature"
 frames = ["guy_stand"]
+dead_frames = ["guy_dead"]
 locomotion_frames = ["guy_walk1", "guy_walk2"]
 speed = 5.0
 health = 100
@@ -34,6 +36,7 @@ locomotion_frames = ["zombie_walk1", "zombie_walk2"]
 dead_frames = ["zombie_dead1"]
 health = 25
 speed = 2
+weapon = "fists"
 
 [missile]
 health = 1

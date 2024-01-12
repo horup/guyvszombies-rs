@@ -1,4 +1,5 @@
 guy = "images/guy.png"
+guy_dead = "images/guy_dead.png"
 bullet_1 = "images/bullet_1.png"
 bullet_2 = "images/bullet_2.png"
 bullet_3 = "images/bullet_3.png"

@@ -3,6 +3,7 @@ display_name = "Fists"
 rate_of_fire = 3
 damage = [3,6]
 projectile = "fists"
+range = 1.5
 
 [pistol]
 display_name = "Pistol"
@@ -13,7 +14,6 @@ damage = [5,10]
 mount_offset = 0.15
 muzzle_offset = 1.0
 projectile = "bullet"
-
 
 [rifle]
 extends = "pistol"
